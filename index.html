@@ -730,10 +730,19 @@ function previewInstructions(){document.getElementById('previewText').textConten
 async function saveDraft(){
   if(!v('attyFirst')||!v('attyLast')){alert('Please enter your name before saving.');return;}
   if(!v('caseName')){alert('Please enter a case name before saving.');return;}
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(gatherState(),null,2)],{type:'application/json'}));a.download='DRAFT_'+(v('caseName')||'Case').replace(/[^a-z0-9]/gi,'_')+'_state.json';a.click();URL.revokeObjectURL(a.href);
-  await generateDocx(true);
-  isDraft=true;document.getElementById('draftBadge').classList.add('visible');document.getElementById('ws2').classList.add('done');document.getElementById('ws3').classList.add('active');
-  alert('Draft saved!\n\n✓ Share the .json with the reviewing partner to load it back.\n✓ DRAFT Word doc also downloaded.\n\nWhen ready, click "Finalize & Submit".');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(gatherState(),null,2)],{type:'application/json'}));
+  a.download='DRAFT_'+(v('caseName')||'Case').replace(/[^a-z0-9]/gi,'_')+'_state.json';
+  a.click();URL.revokeObjectURL(a.href);
+  try{
+    if(typeof docx !== 'undefined') await generateDocx(true);
+    else console.warn('docx library not available — skipping Word export');
+  }catch(e){ console.warn('Word generation failed:',e); }
+  isDraft=true;
+  document.getElementById('draftBadge').classList.add('visible');
+  document.getElementById('ws2').classList.add('done');
+  document.getElementById('ws3').classList.add('active');
+  alert('Draft saved!\n\n✓ .json state file downloaded — share with reviewing partner.\n✓ Word doc downloaded if available.\n\nWhen ready, click "Finalize & Submit".');
 }
 function copyField(id){
   const el=document.getElementById(id);
@@ -749,24 +758,27 @@ async function finalizeAndSubmit(){
   if(!v('caseName')){alert('Please enter a case name.');return;}
   const recips=getRecipEmails();if(!recips.length){alert('Please add at least one data team recipient.');return;}
   if(!isDraft&&!confirm('Form has not been saved as a draft yet. Submit anyway?'))return;
-  await generateDocx(false);
-  const cn=v('caseName')||'Case';const atty=(v('attyFirst')+' '+v('attyLast')).trim();
+
+  const cn=v('caseName')||'Case';
+  const atty=(v('attyFirst')+' '+v('attyLast')).trim();
   const ccEmails=[toEmail(v('attyFirst'),v('attyLast')),...getCCEmails()].filter(Boolean);
   const recipNames=getRecipNames();
   const subject='Damages Instructions – '+cn+(recipNames.length?' – Assigned to '+recipNames.join(', '):'');
   const body='Hi '+(recipNames.join(' & ')||'team')+',\n\nPlease find the finalized damages instructions for '+cn+' attached as a Word document.\n\nSubmitted by: '+atty+'\nCase: '+cn+'\nBilling code: '+(v('billingCode')||'—')+'\nFirst-round deadline: '+(v('deadlineFirst')||'—')+'\n\nPlease reach out with any questions.\n\n'+atty;
-  document.getElementById('ws4').classList.add('active');
 
-  // Populate fallback modal
+  // Try Word doc generation — silently skip if docx library unavailable (e.g. sandbox)
+  try{
+    if(typeof docx !== 'undefined') await generateDocx(false);
+    else console.warn('docx library not available — skipping Word export');
+  }catch(e){ console.warn('Word generation failed:',e); }
+
+  // Always show email modal
   document.getElementById('emailTo').value=recips.join(', ');
   document.getElementById('emailCC').value=ccEmails.join(', ');
   document.getElementById('emailSubject').value=subject;
   document.getElementById('emailBody').value=body;
-
-  // Try mailto first; show fallback modal regardless after short delay
-  const mailto='mailto:'+recips.join(',')+'?cc='+encodeURIComponent(ccEmails.join(','))+'&subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
-  try{ window.location.href=mailto; }catch(e){}
-  setTimeout(()=>{ document.getElementById('emailOverlay').classList.add('open'); }, 600);
+  document.getElementById('ws4').classList.add('active');
+  document.getElementById('emailOverlay').classList.add('open');
 }
 function copyPreview(){navigator.clipboard.writeText(document.getElementById('previewText').textContent).then(()=>{const b=event.target;b.textContent='Copied!';setTimeout(()=>b.textContent='Copy to clipboard',2000);});}
 
