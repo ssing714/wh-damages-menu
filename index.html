@@ -3,162 +3,270 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wage & Hour Damages Menu</title>
+<title>W&H Misclassification Damages Menu</title>
+<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f2;min-height:100vh}
-.app{max-width:960px;margin:0 auto;padding:24px 16px 48px}
-.header{margin-bottom:20px}
-.header h1{font-size:20px;font-weight:600;margin-bottom:4px}
-.header p{font-size:13px;color:#666}
-.progress-bar{height:3px;background:#eee;border-radius:2px;margin-bottom:20px}
+.app{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.topbar-left h1{font-size:18px;font-weight:700;margin-bottom:2px}
+.topbar-left .sub{font-size:12px;color:#888;font-style:italic}
+.topbar-left p{font-size:12px;color:#666;margin-top:3px}
+.topbar-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.draft-badge{font-size:11px;padding:3px 10px;border-radius:12px;background:#fff3e0;color:#e65100;font-weight:700;border:1px solid #ffcc80;display:none}
+.draft-badge.visible{display:inline-block}
+.progress-bar{height:3px;background:#eee;border-radius:2px;margin-bottom:14px}
 .progress-fill{height:100%;background:#1a1a1a;border-radius:2px;transition:width .3s}
-.section{background:white;border:1px solid #e5e5e5;border-radius:10px;margin-bottom:14px;overflow:hidden}
-.section-header{padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;border-bottom:1px solid transparent}
-.section-header:hover{background:#fafafa}
-.section.open .section-header{border-bottom-color:#e5e5e5}
-.section-title{font-size:14px;font-weight:600;flex:1}
-.section-subtitle{font-size:12px;color:#888}
-.chevron{font-size:11px;color:#999;transition:transform .2s}
-.section.open .chevron{transform:rotate(180deg)}
-.section-body{padding:16px;display:none}
-.section.open .section-body{display:block}
-.field-group{margin-bottom:14px}
-.field-label{font-size:12px;font-weight:600;color:#444;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.4px}
-.field-hint{font-size:12px;color:#888;margin-bottom:6px}
+.wfbar{background:white;border:1px solid #e5e5e5;border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ws{display:flex;align-items:center;gap:6px;font-size:12px;color:#aaa}
+.ws.active{color:#1a1a1a;font-weight:600}
+.ws.done{color:#16a34a}
+.wd{width:20px;height:20px;border-radius:50%;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#bbb;flex-shrink:0}
+.ws.active .wd{border-color:#1a1a1a;color:#1a1a1a}
+.ws.done .wd{border-color:#16a34a;background:#16a34a;color:white}
+.wa{color:#ccc;font-size:11px}
+.section{background:white;border:1px solid #e5e5e5;border-radius:10px;margin-bottom:11px;overflow:hidden}
+.sh{padding:11px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;border-bottom:1px solid transparent}
+.sh:hover{background:#fafafa}
+.section.open .sh{border-bottom-color:#e5e5e5}
+.st{font-size:14px;font-weight:600;flex:1}
+.ss{font-size:11px;color:#888}
+.chev{font-size:10px;color:#999;transition:transform .2s}
+.section.open .chev{transform:rotate(180deg)}
+.sb{padding:15px 16px;display:none}
+.section.open .sb{display:block}
+.fl{font-size:11px;font-weight:700;color:#444;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.fh{font-size:12px;color:#888;margin-bottom:5px;line-height:1.4}
+.fg{margin-bottom:12px}
 input[type=text],input[type=date],input[type=number],select,textarea{width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;color:#1a1a1a;background:white;font-family:inherit}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#888}
-textarea{resize:vertical;min-height:56px;line-height:1.5}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.state-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:8px}
-.state-card{border:1px solid #e0e0e0;border-radius:8px;padding:9px 12px;cursor:pointer;transition:all .15s}
-.state-card:hover{border-color:#999}
-.state-card.selected{border-color:#1a1a1a;background:#f8f8f8}
-.state-card .state-name{font-size:13px;font-weight:600}
-.state-card .state-note{font-size:11px;color:#888;margin-top:2px}
-.state-card.selected .state-note{color:#555}
-.damages-grid{display:grid;gap:8px}
-.damage-item{border:1px solid #e5e5e5;border-radius:8px;overflow:hidden}
-.damage-row{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;cursor:pointer}
-.damage-row:hover{background:#fafafa}
-.damage-check{margin-top:1px;flex-shrink:0;cursor:pointer}
-.damage-info{flex:1}
-.damage-name{font-size:13px;font-weight:600}
-.damage-desc{font-size:12px;color:#777;margin-top:2px;line-height:1.4}
-.damage-extra{padding:0 12px 10px 34px;display:none}
-.damage-extra.visible{display:block}
-.damage-extra textarea{font-size:12px}
-.damage-extra input[type=number],.damage-extra input[type=date],.damage-extra select{font-size:12px}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f0f0}
-.toggle-row:last-child{border-bottom:none}
-.toggle-label{font-size:13px;flex:1}
-.toggle-sublabel{font-size:11px;color:#888;margin-top:2px}
-.toggle-input{display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:13px}
-.toggle-input input[type=number]{width:76px;text-align:right}
-.toggle-input select{width:180px}
-.tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:4px;margin-left:6px;font-weight:500}
-.tag-required{background:#fff3e0;color:#e65100}
-.tag-specialty{background:#e3f2fd;color:#1565c0}
-.tag-optional{background:#f3e5f5;color:#6a1b9a}
-.notes-block{margin-top:12px;padding-top:12px;border-top:1px solid #f0f0f0}
-.btn-primary{padding:9px 20px;background:#1a1a1a;color:white;border:none;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer}
-.btn-primary:hover{background:#333}
-.btn-secondary{padding:8px 14px;background:white;color:#444;border:1px solid #ccc;border-radius:7px;font-size:13px;cursor:pointer}
-.btn-secondary:hover{background:#f5f5f5}
-.upload-zone{border:1.5px dashed #ccc;border-radius:8px;padding:18px 16px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:8px}
-.upload-zone:hover,.upload-zone.drag{border-color:#888;background:#fafafa}
-.upload-zone p{font-size:13px;color:#666;margin-bottom:4px}
-.upload-zone small{font-size:11px;color:#aaa}
-.file-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-.file-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f8f8f8;border:1px solid #e8e8e8;border-radius:6px;font-size:12px}
-.file-icon{font-size:14px}
-.file-name{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.file-size{color:#888;white-space:nowrap}
-.file-remove{cursor:pointer;color:#aaa;background:none;border:none;font-size:14px;line-height:1;padding:0 2px}
-.file-remove:hover{color:#c0392b}
-.other-states-panel{margin-top:10px;padding:12px;border:1px solid #e5e5e5;border-radius:8px;background:#fafafa;display:none}
-.other-states-panel.visible{display:block}
-.state-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:260px;overflow-y:auto;margin-bottom:10px}
-.state-list label{display:flex;align-items:center;gap:8px;font-size:13px;padding:4px 6px;border-radius:5px;cursor:pointer}
-.state-list label:hover{background:#f0f0f0}
-.state-list input[type=checkbox]{flex-shrink:0}
-.summary-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto}
-.summary-modal.open{display:flex}
-.summary-box{background:white;border-radius:12px;width:100%;max-width:740px}
-.summary-box-header{padding:16px 20px;border-bottom:1px solid #e5e5e5;display:flex;justify-content:space-between;align-items:center}
-.summary-box-header h2{font-size:16px;font-weight:600}
-.close-btn{font-size:18px;cursor:pointer;color:#888;background:none;border:none;line-height:1}
-pre.instructions{background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;padding:16px;font-size:12px;font-family:monospace;white-space:pre-wrap;line-height:1.6;max-height:420px;overflow-y:auto;margin:16px 20px 0}
-.copy-area{padding:12px 20px 20px;display:flex;gap:8px}
-.recip-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.recip-preview{font-size:12px;color:#888;min-width:160px;flex-shrink:0}
+textarea{resize:vertical;min-height:50px;line-height:1.5}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.tag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;margin-left:4px;font-weight:700}
+.tag-req{background:#fff3e0;color:#e65100}
+.tag-sp{background:#e3f2fd;color:#1565c0}
+.tag-opt{background:#f3e5f5;color:#6a1b9a}
+.tag-tog{background:#e8f5e9;color:#2e7d32}
+.nb{margin-top:10px;padding-top:10px;border-top:1px solid #f0f0f0}
+.btn{padding:8px 15px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid #ccc;background:white;color:#444}
+.btn:hover{background:#f5f5f5}
+.btn-dark{background:#1a1a1a;color:white;border-color:#1a1a1a}
+.btn-dark:hover{background:#333}
+.btn-amber{background:#d97706;color:white;border-color:#d97706}
+.btn-amber:hover{background:#b45309}
+.btn-green{background:#16a34a;color:white;border-color:#16a34a}
+.btn-green:hover{background:#15803d}
+.btn-sm{padding:5px 10px;font-size:12px}
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:7px;margin-bottom:8px}
+.sc{border:1px solid #e0e0e0;border-radius:8px;padding:8px 11px;cursor:pointer;transition:all .15s}
+.sc:hover{border-color:#999}
+.sc.sel{border-color:#1a1a1a;background:#f8f8f8}
+.sc .sn{font-size:13px;font-weight:600}
+.sc .sst{font-size:11px;color:#888;margin-top:1px}
+.sc.sel .sst{color:#555}
+.dg{display:grid;gap:7px}
+.di{border:1px solid #e5e5e5;border-radius:8px;overflow:hidden}
+.dr{display:flex;align-items:flex-start;gap:9px;padding:9px 12px;cursor:pointer}
+.dr:hover{background:#fafafa}
+.dc{margin-top:1px;flex-shrink:0;cursor:pointer}
+.di-info{flex:1}
+.dn{font-size:13px;font-weight:600}
+.dd{font-size:12px;color:#777;margin-top:2px;line-height:1.4}
+.dx{padding:0 12px 10px 32px;display:none}
+.dx.vis{display:block}
+.dx textarea{font-size:12px}
+.tr{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;gap:12px}
+.tr:last-child{border-bottom:none}
+.tl{font-size:13px;flex:1}
+.tsl{font-size:11px;color:#888;margin-top:2px}
+.ti{display:flex;align-items:center;gap:7px;white-space:nowrap;font-size:13px;flex-shrink:0}
+.ti input[type=number]{width:68px;text-align:right}
+.ti select{width:160px}
+.osp{margin-top:9px;padding:11px;border:1px solid #e5e5e5;border-radius:8px;background:#fafafa;display:none}
+.osp.vis{display:block}
+.sl{display:grid;grid-template-columns:1fr 1fr;gap:4px;max-height:220px;overflow-y:auto;margin-bottom:8px}
+.sl label{display:flex;align-items:center;gap:7px;font-size:12px;padding:3px 5px;border-radius:4px;cursor:pointer}
+.sl label:hover{background:#ececec}
+.rr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.rp{font-size:12px;color:#888;min-width:150px;flex-shrink:0}
+.fr{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8f8f8;border:1px solid #e8e8e8;border-radius:6px;font-size:12px;margin-bottom:5px}
+.fn{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsi{color:#888;white-space:nowrap}
+.frm{cursor:pointer;color:#aaa;background:none;border:none;font-size:14px;line-height:1;padding:0 2px}
+.frm:hover{color:#c0392b}
+.uz{border:1.5px dashed #ccc;border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:7px}
+.uz:hover,.uz.drag{border-color:#888;background:#fafafa}
+.uz p{font-size:13px;color:#666;margin-bottom:2px}
+.uz small{font-size:11px;color:#aaa}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:24px}
+.overlay.open{display:flex}
+.modal-box{background:white;border-radius:10px;width:100%;max-width:720px}
+.mh{padding:13px 20px;border-bottom:1px solid #e5e5e5;display:flex;justify-content:space-between;align-items:center}
+.mh h2{font-size:15px;font-weight:600}
+.mc{font-size:18px;cursor:pointer;color:#888;background:none;border:none;line-height:1}
+pre.pv{background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;padding:13px;font-size:11px;font-family:monospace;white-space:pre-wrap;line-height:1.6;max-height:420px;overflow-y:auto;margin:13px 20px 0}
+.mf{padding:11px 20px 16px;display:flex;gap:8px;flex-wrap:wrap}
+.int-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f0f0f0;flex-wrap:wrap}
+.int-row:last-child{border-bottom:none}
+.int-rate{font-size:12px;color:#666;margin-left:4px}
+.cc-row{display:flex;gap:8px;margin-bottom:7px}
+.np-row{display:flex;gap:8px;margin-bottom:7px}
+.divider{height:1px;background:#f0f0f0;margin:11px 0}
+.opt-label{font-size:12px;color:#888;font-style:italic;margin-left:4px;font-weight:400;text-transform:none;letter-spacing:0}
 </style>
 </head>
 <body>
 <div class="app">
-<div class="header">
-  <h1>Wage &amp; Hour Damages Menu</h1>
-  <p>Complete each section to generate and send standardized damages instructions.</p>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <h1>Wage &amp; Hour Damages Menu</h1>
+    <div class="sub">Misclassification &amp; Salaried Worker Cases</div>
+    <p>Fill out → save draft → partner review → finalize &amp; submit</p>
+  </div>
+  <div class="topbar-right">
+    <span class="draft-badge" id="draftBadge">DRAFT</span>
+    <button class="btn btn-sm" onclick="document.getElementById('loadInput').click()">Load draft</button>
+    <input type="file" id="loadInput" accept=".json" style="display:none" onchange="loadStateFromFile(this)">
+    <button class="btn btn-sm" onclick="openPasteModal()">Paste JSON</button>
+  </div>
 </div>
+
+<!-- PASTE MODAL -->
+<div class="overlay" id="pasteOverlay">
+  <div class="modal-box" style="max-width:560px">
+    <div class="mh">
+      <h2>Paste draft JSON</h2>
+      <button class="mc" onclick="closePasteModal()">✕</button>
+    </div>
+    <div style="padding:16px 20px">
+      <p style="font-size:12px;color:#666;margin-bottom:8px">Paste the contents of your saved <code>.json</code> draft file below, then click Load.</p>
+      <textarea id="pasteJsonInput" style="width:100%;height:220px;font-family:monospace;font-size:11px" placeholder='{"fields":{...}}'></textarea>
+      <div id="pasteError" style="font-size:12px;color:#dc2626;margin-top:6px;display:none"></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-dark" onclick="loadFromPaste()">Load</button>
+      <button class="btn" onclick="closePasteModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div class="overlay" id="previewOverlay">
+  <div class="modal-box">
+    <div class="mh"><h2>Instructions preview</h2><button class="mc" onclick="document.getElementById('previewOverlay').classList.remove('open')">✕</button></div>
+    <pre class="pv" id="previewText"></pre>
+    <div class="mf">
+      <button class="btn btn-dark" onclick="copyPreview()">Copy to clipboard</button>
+      <button class="btn" onclick="document.getElementById('previewOverlay').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL FALLBACK MODAL -->
+<div class="overlay" id="emailOverlay">
+  <div class="modal-box">
+    <div class="mh"><h2>✉ Ready to send</h2><button class="mc" onclick="document.getElementById('emailOverlay').classList.remove('open')">✕</button></div>
+    <div style="padding:16px 20px">
+      <p style="font-size:12px;color:#666;margin-bottom:12px">The Word doc has been downloaded. If Outlook didn't open automatically, use the details below to send manually.</p>
+      <div style="margin-bottom:10px">
+        <label class="fl" style="margin-bottom:4px">To</label>
+        <input type="text" id="emailTo" readonly style="background:#f5f5f5;font-size:12px">
+      </div>
+      <div style="margin-bottom:10px">
+        <label class="fl" style="margin-bottom:4px">CC</label>
+        <input type="text" id="emailCC" readonly style="background:#f5f5f5;font-size:12px">
+      </div>
+      <div style="margin-bottom:10px">
+        <label class="fl" style="margin-bottom:4px">Subject</label>
+        <input type="text" id="emailSubject" readonly style="background:#f5f5f5;font-size:12px">
+      </div>
+      <div style="margin-bottom:6px">
+        <label class="fl" style="margin-bottom:4px">Body</label>
+        <textarea id="emailBody" readonly style="background:#f5f5f5;font-size:12px;height:140px"></textarea>
+      </div>
+      <p style="font-size:11px;color:#888;margin-top:4px">Attach the downloaded Word doc to your email before sending.</p>
+    </div>
+    <div class="mf" style="flex-wrap:wrap;gap:8px">
+      <button class="btn btn-dark" onclick="copyField('emailTo')">Copy To</button>
+      <button class="btn btn-dark" onclick="copyField('emailCC')">Copy CC</button>
+      <button class="btn btn-dark" onclick="copyField('emailSubject')">Copy Subject</button>
+      <button class="btn btn-dark" onclick="copyField('emailBody')">Copy Body</button>
+      <button class="btn" onclick="document.getElementById('emailOverlay').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- WORKFLOW -->
+<div class="wfbar">
+  <div class="ws active" id="ws1"><div class="wd">1</div>Fill out form</div>
+  <div class="wa">›</div>
+  <div class="ws" id="ws2"><div class="wd">2</div>Save draft + Word</div>
+  <div class="wa">›</div>
+  <div class="ws" id="ws3"><div class="wd">3</div>Partner review</div>
+  <div class="wa">›</div>
+  <div class="ws" id="ws4"><div class="wd">4</div>Finalize &amp; submit</div>
+</div>
+
 <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 
 <!-- 0. PEOPLE -->
 <div class="section open" id="sec-people">
-  <div class="section-header" onclick="tog('sec-people')">
-    <div class="section-title">0. Attorney &amp; recipients</div>
-    <div class="section-subtitle">Who is submitting and who should receive the instructions</div>
-    <div class="chevron">▼</div>
-  </div>
-  <div class="section-body">
-    <div class="field-group">
-      <label class="field-label">Submitting attorney <span class="tag tag-required">required</span></label>
-      <p class="field-hint">Your email will be auto-generated and CC'd on the instructions email.</p>
-      <div class="grid-2">
+  <div class="sh" onclick="tog('sec-people')"><div class="st">0. Attorney &amp; recipients</div><div class="ss">Submitting attorney, reviewing partner, CC attorneys, data team</div><div class="chev">▼</div></div>
+  <div class="sb">
+    <div class="fg">
+      <label class="fl">Submitting attorney <span class="tag tag-req">required</span></label>
+      <p class="fh">Your email (first initial + last name @outtengolden.com) will be auto-generated and CC'd.</p>
+      <div class="g2">
         <input type="text" id="attyFirst" placeholder="First name" oninput="updateProg();previewEmails()">
         <input type="text" id="attyLast" placeholder="Last name" oninput="updateProg();previewEmails()">
       </div>
-      <div id="attyEmailPreview" style="font-size:12px;color:#888;margin-top:5px"></div>
+      <div id="attyEmailPreview" style="font-size:12px;color:#888;margin-top:4px"></div>
     </div>
-    <div class="field-group">
-      <label class="field-label">Recipients <span class="tag tag-required">at least one</span></label>
-      <p class="field-hint">Add each data team member who should receive the instructions email.</p>
-      <div id="recipientList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div>
-      <button class="btn-secondary" style="font-size:12px;padding:5px 11px" onclick="addRecipient()">+ Add recipient</button>
+    <div class="fg">
+      <label class="fl">Role</label>
+      <select id="attyRole"><option value="associate">Associate (drafting)</option><option value="partner">Partner (reviewing / finalizing)</option></select>
+    </div>
+    <div class="fg">
+      <label class="fl">Reviewing / supervising partner <span class="opt-label">(if associate is drafting)</span></label>
+      <div class="g2">
+        <input type="text" id="partnerFirst" placeholder="Partner first name" oninput="previewEmails()">
+        <input type="text" id="partnerLast" placeholder="Partner last name" oninput="previewEmails()">
+      </div>
+      <div id="partnerEmailPreview" style="font-size:12px;color:#888;margin-top:4px"></div>
+    </div>
+    <div class="fg">
+      <label class="fl">Additional attorneys to CC <span class="opt-label">(larger teams / added visibility)</span></label>
+      <div id="ccList" style="margin-bottom:7px"></div>
+      <button class="btn btn-sm" onclick="addCC()">+ Add attorney</button>
+    </div>
+    <div class="divider"></div>
+    <div class="fg">
+      <label class="fl">Data team recipients <span class="tag tag-req">at least one</span></label>
+      <div id="recipientList" style="margin-bottom:7px"></div>
+      <button class="btn btn-sm" onclick="addRecipient()">+ Add recipient</button>
     </div>
   </div>
 </div>
 
 <!-- 1. CASE INFO -->
 <div class="section" id="sec-case">
-  <div class="section-header" onclick="tog('sec-case')">
-    <div class="section-title">1. Case information</div>
-    <div class="section-subtitle">Basic case identifiers and key dates</div>
-    <div class="chevron">▼</div>
-  </div>
-  <div class="section-body">
-    <div class="grid-2">
-      <div class="field-group">
-        <label class="field-label">Case / Client name <span class="tag tag-required">required</span></label>
-        <input type="text" id="caseName" placeholder="e.g. Wells Fargo – Senior Premier Banker" oninput="updateProg()">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Matter / File number</label>
-        <input type="text" id="matterNum" placeholder="e.g. 240175">
-      </div>
+  <div class="sh" onclick="tog('sec-case')"><div class="st">1. Case information</div><div class="ss">Identifiers, named plaintiffs, key dates, logistics</div><div class="chev">▼</div></div>
+  <div class="sb">
+    <div class="g3">
+      <div class="fg"><label class="fl">Case / Client name <span class="tag tag-req">required</span></label><input type="text" id="caseName" placeholder="e.g. Wells Fargo – SPB" oninput="updateProg()"></div>
+      <div class="fg"><label class="fl">Matter / File number</label><input type="text" id="matterNum" placeholder="e.g. 240175"></div>
+      <div class="fg"><label class="fl">Billing code</label><input type="text" id="billingCode" placeholder="e.g. 2024-WF-001"></div>
     </div>
-    <div class="grid-3">
-      <div class="field-group">
-        <label class="field-label">Data end date <span class="tag tag-required">required</span></label>
-        <input type="date" id="dataEndDate" oninput="updateProg()">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Extrapolation / mediation date <span class="tag tag-required">required</span></label>
-        <input type="date" id="extrapolationDate" oninput="updateProg()">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Pay period type</label>
+    <div class="g3">
+      <div class="fg"><label class="fl">Job title(s) / class description</label><input type="text" id="jobTitles" placeholder="e.g. Senior Premier Bankers"></div>
+      <div class="fg">
+        <label class="fl">Pay period type</label>
         <select id="payPeriod">
+          <option value="unknown">Do not know — data team to confirm</option>
           <option value="biweekly">Biweekly (most common)</option>
           <option value="semimonthly">Semi-monthly</option>
           <option value="weekly">Weekly</option>
@@ -166,237 +274,162 @@ pre.instructions{background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;p
           <option value="monthly">Monthly</option>
         </select>
       </div>
+      <div class="fg">
+        <label class="fl">Extrapolation / mediation date <span class="tag tag-tog">toggle</span></label>
+        <p class="fh">Toggleable in the model — can be updated as parties negotiate.</p>
+        <input type="date" id="extrapolationDate">
+      </div>
     </div>
-    <div class="field-group">
-      <label class="field-label">Job title(s) / class description</label>
-      <input type="text" id="jobTitles" placeholder="e.g. Senior Premier Bankers, Store-Based Hourly Employees">
+    <div class="g3">
+      <div class="fg"><label class="fl">First-round deadline</label><input type="date" id="deadlineFirst"></div>
+      <div class="fg"><label class="fl">Final model deadline</label><input type="date" id="deadlineFinal"></div>
+      <div class="fg"><label class="fl">Key logistics / other dates</label><input type="text" id="logistics" placeholder="e.g. Data memo due Feb 28"></div>
     </div>
-    <div class="notes-block">
-      <label class="field-label">Additional notes</label>
-      <textarea id="caseNotes" placeholder="Any additional context about the case scope, class definition, or other relevant details..."></textarea>
+    <div class="fg">
+      <label class="fl">Named plaintiffs &amp; unique IDs</label>
+      <p class="fh">Add each named plaintiff and their employee ID if known. Used to crosscheck the dataset.</p>
+      <div id="npList" style="margin-bottom:7px"></div>
+      <button class="btn btn-sm" onclick="addNP()">+ Add named plaintiff</button>
     </div>
+    <div class="nb"><label class="fl">Additional notes</label><textarea id="caseNotes" placeholder="Class definition, scope, any other context..."></textarea></div>
   </div>
 </div>
 
 <!-- 2. DATA SOURCES -->
 <div class="section" id="sec-data">
-  <div class="section-header" onclick="tog('sec-data')">
-    <div class="section-title">2. Data sources</div>
-    <div class="section-subtitle">Upload files and describe data received from opposing counsel</div>
-    <div class="chevron">▼</div>
-  </div>
-  <div class="section-body">
-    <div class="field-group">
-      <label class="field-label">Upload data files</label>
-      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
-        <p>Click to upload or drag and drop files here</p>
-        <small>Accepted formats: XLSX, XLS, CSV, PDF &nbsp;·&nbsp; If your file is a different format, note it below</small>
+  <div class="sh" onclick="tog('sec-data')"><div class="st">2. Data sources</div><div class="ss">Files, links, dataset description, field mapping</div><div class="chev">▼</div></div>
+  <div class="sb">
+    <div class="fg">
+      <label class="fl">Upload files <span class="opt-label">(optional)</span></label>
+      <p class="fh">Accepted: XLSX, XLS, CSV, PDF. For large or multi-file datasets use a link below instead.</p>
+      <div class="uz" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave()" ondrop="dropFile(event)">
+        <p>Click to upload or drag and drop</p><small>XLSX · XLS · CSV · PDF only</small>
       </div>
       <input type="file" id="fileInput" multiple accept=".xlsx,.xls,.csv,.pdf" style="display:none" onchange="handleFiles(this.files)">
-      <div class="file-list" id="fileList"></div>
+      <div id="fileList"></div>
     </div>
-    <div class="field-group">
-      <label class="field-label">File descriptions</label>
-      <p class="field-hint">For each file, briefly describe what data it contains, which fields are relevant, and the date range it covers.</p>
-      <div id="dataSources">
-        <div class="data-source-row" style="display:flex;gap:8px;margin-bottom:8px">
-          <input type="text" placeholder="File name (e.g. DefendantProducedEmployeeList.xlsx)" style="flex:1.2">
-          <input type="text" placeholder="Description (fields, format, date range...)" style="flex:2">
-        </div>
-        <div class="data-source-row" style="display:flex;gap:8px;margin-bottom:8px">
-          <input type="text" placeholder="File name" style="flex:1.2">
-          <input type="text" placeholder="Description" style="flex:2">
-        </div>
-      </div>
-      <button class="btn-secondary" style="font-size:12px;padding:5px 11px" onclick="addDataSource()">+ Add file description</button>
+    <div class="fg">
+      <label class="fl">Dataset link(s)</label>
+      <div id="linkList"></div>
+      <button class="btn btn-sm" onclick="addLink()">+ Add link</button>
     </div>
-    <div class="notes-block">
-      <label class="field-label">Additional notes</label>
-      <textarea id="dataNotes" placeholder="e.g. Files received in non-standard format; data issues flagged; specific columns to use..."></textarea>
+    <div class="fg"><label class="fl">General dataset description</label><textarea id="datasetDesc" placeholder="Number of files, type of data, date range, known issues..." rows="3"></textarea></div>
+    <div class="fg">
+      <label class="fl">Field / column mapping</label>
+      <p class="fh">Specify exact column names if known. Data team will confirm rate calculation basis from the dataset.</p>
+      <textarea id="fieldMapping" placeholder="e.g.&#10;Employee ID → Column A&#10;Regular Pay → Column J (Gross Pay)&#10;OT Hours → Column M&#10;Work State → Column D (most recent)&#10;Bonus → Column K" rows="6"></textarea>
     </div>
+    <div class="nb"><label class="fl">Additional notes</label><textarea id="dataNotes" placeholder="Non-standard formats, data quality issues, specific tabs, columns to ignore..."></textarea></div>
   </div>
 </div>
 
 <!-- 3. JURISDICTIONS -->
 <div class="section" id="sec-states">
-  <div class="section-header" onclick="tog('sec-states')">
-    <div class="section-title">3. Jurisdictions</div>
-    <div class="section-subtitle">Select all states with class members</div>
-    <div class="chevron">▼</div>
-  </div>
-  <div class="section-body">
-    <p class="field-hint">FLSA applies to all. Select specialty states and others with class members. SOL start dates and lengths appear after selection.</p>
-    <div class="state-grid" id="stateGrid"></div>
-    <div id="otherStatesPanel" class="other-states-panel">
-      <label class="field-label" style="margin-bottom:8px">Select other states with class members</label>
-      <div class="state-list" id="otherStateList"></div>
-    </div>
-    <div id="solDates" style="margin-top:14px;display:none">
-      <label class="field-label">SOL dates &amp; lengths</label>
+  <div class="sh" onclick="tog('sec-states')"><div class="st">3. Jurisdictions</div><div class="ss">Select all applicable — FLSA optional for state-only cases</div><div class="chev">▼</div></div>
+  <div class="sb">
+    <p class="fh">FLSA is selected by default but can be deselected for state-only cases. SOL fields appear after selection.</p>
+    <div class="sg" id="stateGrid"></div>
+    <div id="otherStatesPanel" class="osp"><label class="fl" style="margin-bottom:7px">Select other states</label><div class="sl" id="otherStateList"></div></div>
+    <div id="solDates" style="margin-top:12px;display:none">
+      <label class="fl">SOL start dates &amp; lengths</label>
       <div id="solFields"></div>
-      <p style="font-size:12px;color:#888;font-style:italic;margin-top:4px">SOL end date for all = Extrapolation / Mediation date set in Section 1.</p>
+      <p style="font-size:11px;color:#888;font-style:italic;margin-top:4px">SOL end date = Extrapolation / Mediation date. That date is toggleable in the model.</p>
     </div>
-    <div id="stateNotesBox" style="display:none">
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f0f0f0">
-        <label class="field-label">Additional notes — jurisdictions</label>
-        <textarea id="stateNotes" placeholder="e.g. Employees in multiple states — attribute to most recent work state; minimum employee threshold for state-specific claims..."></textarea>
-      </div>
-    </div>
+    <div id="stateNotesBox" style="display:none"><div class="nb"><label class="fl">Additional notes — jurisdictions</label><textarea id="stateNotes" placeholder="Multi-state employee treatment, headcount thresholds, CO COMPS rules..."></textarea></div></div>
   </div>
 </div>
 
 <!-- 4. TOGGLES -->
 <div class="section" id="sec-toggles">
-  <div class="section-header" onclick="tog('sec-toggles')">
-    <div class="section-title">4. Toggles &amp; assumptions</div>
-    <div class="section-subtitle">Adjustable variables for the model</div>
-    <div class="chevron">▼</div>
-  </div>
-  <div class="section-body">
-    <div class="toggle-row">
-      <div><div class="toggle-label">OT hours per week variable</div><div class="toggle-sublabel">Average overtime hours per workweek. Used in rate and damages formulas.</div></div>
-      <div class="toggle-input"><input type="number" id="otHours" value="5" min="0" step=".5"> hrs</div>
+  <div class="sh" onclick="tog('sec-toggles')"><div class="st">4. Toggles &amp; assumptions</div><div class="ss">Check only what applies to this case</div><div class="chev">▼</div></div>
+  <div class="sb">
+    <p class="fh" style="margin-bottom:10px">Not all toggles apply to every case. The data team will confirm the rate calculation basis based on their dataset review.</p>
+    <div class="tr">
+      <div><div class="tl"><input type="checkbox" id="tog_ot" checked style="width:auto;margin-right:6px">OT hours per week</div><div class="tsl">Average overtime hours per workweek — used in all rate and damages formulas.</div></div>
+      <div class="ti"><input type="number" id="otHours" value="5" min="0" step=".5"> hrs</div>
     </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Percent of workweeks at issue</div><div class="toggle-sublabel">Discount for vacation, PTO, and non-violation weeks (standard: 90%).</div></div>
-      <div class="toggle-input"><input type="number" id="pctWorkweeks" value="90" min="0" max="100" step="5"> %</div>
+    <div class="tr">
+      <div><div class="tl"><input type="checkbox" id="tog_pct" checked style="width:auto;margin-right:6px">Percent of workweeks at issue</div><div class="tsl">Discount for vacation, PTO, and non-violation weeks (standard: 90%).</div></div>
+      <div class="ti"><input type="number" id="pctWorkweeks" value="90" min="0" max="100" step="5"> %</div>
     </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Missed meal breaks per week</div><div class="toggle-sublabel">Estimated average missed meal breaks per workweek (placeholder).</div></div>
-      <div class="toggle-input"><input type="number" id="missedMeals" value="3" min="0" step=".5"> / wk</div>
+    <div class="tr">
+      <div><div class="tl"><input type="checkbox" id="tog_meals" style="width:auto;margin-right:6px">Missed meal breaks per week</div><div class="tsl">Only include if meal break damages are being claimed.</div></div>
+      <div class="ti"><input type="number" id="missedMeals" value="3" min="0" step=".5"> / wk</div>
     </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Missed rest breaks per week</div><div class="toggle-sublabel">Estimated average missed rest breaks per workweek (placeholder).</div></div>
-      <div class="toggle-input"><input type="number" id="missedRests" value="1" min="0" step=".5"> / wk</div>
+    <div class="tr">
+      <div><div class="tl"><input type="checkbox" id="tog_rests" style="width:auto;margin-right:6px">Missed rest breaks per week</div><div class="tsl">Only include if rest break damages are being claimed.</div></div>
+      <div class="ti"><input type="number" id="missedRests" value="1" min="0" step=".5"> / wk</div>
     </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Rate calculation basis</div><div class="toggle-sublabel">Denominator for annual workweeks in rate formulas.</div></div>
-      <div class="toggle-input"><select id="rateBasis"><option value="actual">Actual weeks worked</option><option value="52">Fixed 52 weeks</option></select></div>
-    </div>
-    <div class="field-group" style="margin-top:14px">
-      <label class="field-label">Additional toggles / assumptions</label>
-      <textarea id="additionalToggles" placeholder="e.g. HCE threshold post-7/1/2024: $132,964; CO minimum wage 2026: $15.16/hr..."></textarea>
-    </div>
+    <div class="nb"><label class="fl">Additional toggles / assumptions</label><textarea id="additionalToggles" placeholder="e.g. HCE threshold post-7/1/2024: $132,964; CO minimum wage 2026: $15.16/hr..."></textarea></div>
   </div>
 </div>
 
 <!-- 5. DAMAGES -->
 <div class="section" id="sec-damages">
-  <div class="section-header" onclick="tog('sec-damages')">
-    <div class="section-title">5. Damages categories</div>
-    <div class="section-subtitle">Select all categories to include in the model</div>
-    <div class="chevron">▼</div>
-  </div>
-  <div class="section-body">
-
-    <div class="field-group">
-      <div class="field-label">Core overtime damages <span class="tag tag-required">always included</span></div>
-      <div class="damages-grid">
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('ot_base')"><input type="checkbox" class="damage-check" id="ot_base" checked onclick="event.stopPropagation();chk('ot_base')"><div class="damage-info"><div class="damage-name">OT base rate damages (1.5×)</div><div class="damage-desc">1.5 × Regular Rate × OT Hours Variable × SOL Workweeks. Standard high-case model.</div></div></div>
-          <div class="damage-extra visible" id="x_ot_base"><textarea placeholder="Notes on OT base rate, SOL specifics, state variations..."></textarea></div>
-        </div>
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('ot_fww')"><input type="checkbox" class="damage-check" id="ot_fww" checked onclick="event.stopPropagation();chk('ot_fww')"><div class="damage-info"><div class="damage-name">OT FWW rate damages (0.5×)</div><div class="damage-desc">0.5 × FWW Rate × OT Hours Variable × SOL Workweeks. Low-case model. Mutually exclusive with 1.5× for totals.</div></div></div>
-          <div class="damage-extra visible" id="x_ot_fww"><textarea placeholder="Notes on FWW rate, any case-specific instructions..."></textarea></div>
-        </div>
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('ot_incentive')"><input type="checkbox" class="damage-check" id="ot_incentive" checked onclick="event.stopPropagation();chk('ot_incentive')"><div class="damage-info"><div class="damage-name">Incentive rate damages (0.5×)</div><div class="damage-desc">0.5 × Incentive Rate × OT Hours Variable × SOL Workweeks. Added to both 1.5× and FWW totals.</div></div></div>
-          <div class="damage-extra visible" id="x_ot_incentive"><textarea placeholder="Notes on incentive pay fields, commission/bonus treatment..."></textarea></div>
-        </div>
+  <div class="sh" onclick="tog('sec-damages')"><div class="st">5. Damages categories</div><div class="ss">Select categories — notes available for caveats and adjustments</div><div class="chev">▼</div></div>
+  <div class="sb">
+    <div class="fg" style="background:#fafafa;border:1px solid #e8e8e8;border-radius:8px;padding:12px;margin-bottom:14px">
+      <label class="fl">Overall damages caveats &amp; unique items</label>
+      <p class="fh">Flag anything cutting across multiple categories — risk discounts, unusual facts, global adjustments.</p>
+      <textarea id="damagesCaveats" placeholder="e.g. Risk discount of 50% on incentive damages. Exclude arbitration employees from all totals..." rows="3"></textarea>
+    </div>
+    <div class="fg">
+      <div class="fl">Core overtime damages</div>
+      <div class="dg">
+        <div class="di"><div class="dr" onclick="chk('ot_base')"><input type="checkbox" class="dc" id="ot_base" checked onclick="event.stopPropagation();chk('ot_base')"><div class="di-info"><div class="dn">OT base rate damages (1.5×)</div><div class="dd">1.5 × Regular Rate × OT Hours × SOL Workweeks. Standard high-case model.</div></div></div><div class="dx vis" id="x_ot_base"><textarea placeholder="Caveats, assumption adjustments, SOL specifics..."></textarea></div></div>
+        <div class="di"><div class="dr" onclick="chk('ot_fww')"><input type="checkbox" class="dc" id="ot_fww" checked onclick="event.stopPropagation();chk('ot_fww')"><div class="di-info"><div class="dn">OT FWW rate damages (0.5×)</div><div class="dd">0.5 × FWW Rate × OT Hours × SOL Workweeks. Low-case model. Mutually exclusive with 1.5× for totals.</div></div></div><div class="dx vis" id="x_ot_fww"><textarea placeholder="Caveats, disagreements with FWW approach..."></textarea></div></div>
+        <div class="di"><div class="dr" onclick="chk('ot_incentive')"><input type="checkbox" class="dc" id="ot_incentive" checked onclick="event.stopPropagation();chk('ot_incentive')"><div class="di-info"><div class="dn">Incentive rate damages (0.5×)</div><div class="dd">0.5 × Incentive Rate × OT Hours × SOL Workweeks. Added to both 1.5× and FWW totals.</div></div></div><div class="dx vis" id="x_ot_incentive"><textarea placeholder="Notes on bonus/commission fields..."></textarea></div></div>
       </div>
     </div>
-
-    <div class="field-group">
-      <div class="field-label">Liquidated damages</div>
-      <div class="damages-grid">
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('liq_flsa')"><input type="checkbox" class="damage-check" id="liq_flsa" onclick="event.stopPropagation();chk('liq_flsa')"><div class="damage-info"><div class="damage-name">FLSA liquidated damages (100%)</div><div class="damage-desc">Doubles unpaid wages. Good faith defense may apply. Report separately.</div></div></div>
-          <div class="damage-extra" id="x_liq_flsa"><textarea placeholder="Notes on FLSA liquidated damages..."></textarea></div>
-        </div>
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('liq_ny')"><input type="checkbox" class="damage-check" id="liq_ny" onclick="event.stopPropagation();chk('liq_ny')"><div class="damage-info"><div class="damage-name">New York liquidated damages (100%)</div><div class="damage-desc">Automatic 100% of unpaid NY wages. No good faith defense.</div></div></div>
-          <div class="damage-extra" id="x_liq_ny"><textarea placeholder="Notes on NY liquidated damages..."></textarea></div>
-        </div>
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('liq_ma')"><input type="checkbox" class="damage-check" id="liq_ma" onclick="event.stopPropagation();chk('liq_ma')"><div class="damage-info"><div class="damage-name">Massachusetts treble damages (3×)</div><div class="damage-desc">Mandatory 3× all MA wage violations. No good faith defense. Replaces FLSA liquids.</div></div></div>
-          <div class="damage-extra" id="x_liq_ma"><textarea placeholder="Notes on MA treble damages..."></textarea></div>
-        </div>
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('liq_co')"><input type="checkbox" class="damage-check" id="liq_co" onclick="event.stopPropagation();chk('liq_co')"><div class="damage-info"><div class="damage-name">Colorado liquidated damages</div><div class="damage-desc">Automatic: greater of $1,000 or 200% of wages. Willful: greater of $3,000 or 300%. Report both.</div></div></div>
-          <div class="damage-extra" id="x_liq_co"><textarea placeholder="Notes on CO liquidated damages..."></textarea></div>
-        </div>
+    <div class="fg">
+      <div class="fl">Liquidated damages</div>
+      <div class="dg">
+        <div class="di"><div class="dr" onclick="chk('liq_flsa')"><input type="checkbox" class="dc" id="liq_flsa" onclick="event.stopPropagation();chk('liq_flsa')"><div class="di-info"><div class="dn">FLSA liquidated damages (100%)</div><div class="dd">Doubles unpaid wages. Employer may avoid by proving good faith and reasonable belief of compliance.</div></div></div><div class="dx" id="x_liq_flsa"><textarea placeholder="Good faith considerations, notes..."></textarea></div></div>
+        <div class="di"><div class="dr" onclick="chk('liq_ny')"><input type="checkbox" class="dc" id="liq_ny" onclick="event.stopPropagation();chk('liq_ny')"><div class="di-info"><div class="dn">New York liquidated damages (100%)</div><div class="dd">100% of unpaid NY wages. Good faith defense exists but burden is on employer and rarely succeeds in civil actions (post-2011).</div></div></div><div class="dx" id="x_liq_ny"><textarea placeholder="Notes..."></textarea></div></div>
+        <div class="di"><div class="dr" onclick="chk('liq_ma')"><input type="checkbox" class="dc" id="liq_ma" onclick="event.stopPropagation();chk('liq_ma')"><div class="di-info"><div class="dn">Massachusetts treble damages (3×)</div><div class="dd">Mandatory 3× all MA wage violations. No good faith defense. Replaces, does not stack with, FLSA liquids.</div></div></div><div class="dx" id="x_liq_ma"><textarea placeholder="Notes..."></textarea></div></div>
+        <div class="di"><div class="dr" onclick="chk('liq_co')"><input type="checkbox" class="dc" id="liq_co" onclick="event.stopPropagation();chk('liq_co')"><div class="di-info"><div class="dn">Colorado liquidated damages</div><div class="dd">Automatic: greater of $1,000 or 200%. Willful: greater of $3,000 or 300%. Report both scenarios.</div></div></div><div class="dx" id="x_liq_co"><textarea placeholder="Notes..."></textarea></div></div>
       </div>
     </div>
-
-    <div class="field-group">
-      <div class="field-label">Interest</div>
-      <div class="damages-grid">
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('interest')"><input type="checkbox" class="damage-check" id="interest" onclick="event.stopPropagation();chk('interest')"><div class="damage-info"><div class="damage-name">Pre-judgment interest (simple)</div><div class="damage-desc">Principal × (Days from midpoint of year to extrapolation date / 365) × Rate. Calculated on OT and FWW models separately.</div></div></div>
-          <div class="damage-extra" id="x_interest">
-            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
-              <label style="font-size:12px;white-space:nowrap">Rate:</label>
-              <input type="number" id="interestRate" value="9" min="0" step=".5" style="width:65px"> <span style="font-size:12px">%</span>
-              <label style="font-size:12px;white-space:nowrap;margin-left:6px">Jurisdiction:</label>
-              <select id="interestState" style="flex:1;font-size:12px"><option>NY (9%)</option><option>CA (10%)</option><option>MA (12%)</option><option>CO (8%)</option><option>Other</option></select>
-            </div>
-            <textarea placeholder="Additional notes on interest calculation..."></textarea>
-          </div>
-        </div>
+    <div class="fg">
+      <div class="fl">Pre-judgment interest</div>
+      <p class="fh">Select states where interest applies. Statutory rates are pre-filled — override if needed. Applied to unpaid wages only, not liquidated damages.</p>
+      <div class="int-row"><label style="display:flex;align-items:center;gap:8px;font-size:13px;flex:1"><input type="checkbox" id="int_ny"> New York <span class="int-rate">9% per annum</span></label><div style="display:flex;align-items:center;gap:5px;font-size:12px"><label>Override:</label><input type="number" id="int_ny_rate" value="9" step=".5" style="width:52px;font-size:12px"> %</div></div>
+      <div class="int-row"><label style="display:flex;align-items:center;gap:8px;font-size:13px;flex:1"><input type="checkbox" id="int_ca"> California <span class="int-rate">10% per annum</span></label><div style="display:flex;align-items:center;gap:5px;font-size:12px"><label>Override:</label><input type="number" id="int_ca_rate" value="10" step=".5" style="width:52px;font-size:12px"> %</div></div>
+      <div class="int-row"><label style="display:flex;align-items:center;gap:8px;font-size:13px;flex:1"><input type="checkbox" id="int_ma"> Massachusetts <span class="int-rate">12% per annum</span></label><div style="display:flex;align-items:center;gap:5px;font-size:12px"><label>Override:</label><input type="number" id="int_ma_rate" value="12" step=".5" style="width:52px;font-size:12px"> %</div></div>
+      <div class="int-row"><label style="display:flex;align-items:center;gap:8px;font-size:13px;flex:1"><input type="checkbox" id="int_co"> Colorado <span class="int-rate">8% per annum</span></label><div style="display:flex;align-items:center;gap:5px;font-size:12px"><label>Override:</label><input type="number" id="int_co_rate" value="8" step=".5" style="width:52px;font-size:12px"> %</div></div>
+      <div class="int-row"><label style="display:flex;align-items:center;gap:8px;font-size:13px;flex:1"><input type="checkbox" id="int_il"> Illinois <span class="int-rate">5% per annum</span></label><div style="display:flex;align-items:center;gap:5px;font-size:12px"><label>Override:</label><input type="number" id="int_il_rate" value="5" step=".5" style="width:52px;font-size:12px"> %</div></div>
+      <div class="int-row"><label style="display:flex;align-items:center;gap:8px;font-size:13px;flex:1"><input type="checkbox" id="int_other"> Other state</label><div style="display:flex;align-items:center;gap:5px;font-size:12px;flex-wrap:wrap"><input type="text" id="int_other_state" placeholder="State name" style="width:100px;font-size:12px"><input type="number" id="int_other_rate" value="0" step=".5" style="width:52px;font-size:12px"> %</div></div>
+      <div style="margin-top:8px"><textarea id="interestNotes" style="font-size:12px" placeholder="Notes on accrual period, base for calculation..."></textarea></div>
+    </div>
+    <div class="fg">
+      <div class="fl">Break penalties <span class="tag tag-sp">CA / CO</span></div>
+      <div class="dg">
+        <div class="di"><div class="dr" onclick="chk('meal_breaks')"><input type="checkbox" class="dc" id="meal_breaks" onclick="event.stopPropagation();chk('meal_breaks')"><div class="di-info"><div class="dn">Meal break premiums</div><div class="dd">SOL Workweeks × Base Rate × Missed Meals/Week. CA: 1 hr/missed break. CO: 0.5 hr/missed break.</div></div></div><div class="dx" id="x_meal_breaks"><textarea placeholder="States, SOL date, punch data vs. toggle, caveats..."></textarea></div></div>
+        <div class="di"><div class="dr" onclick="chk('rest_breaks')"><input type="checkbox" class="dc" id="rest_breaks" onclick="event.stopPropagation();chk('rest_breaks')"><div class="di-info"><div class="dn">Rest break premiums</div><div class="dd">SOL Workweeks × Base Rate × Missed Rests/Week. CA: 1 hr/missed break. CO: 1/6 hr/missed break.</div></div></div><div class="dx" id="x_rest_breaks"><textarea placeholder="States, SOL date, punch data vs. toggle, caveats..."></textarea></div></div>
       </div>
     </div>
-
-    <div class="field-group">
-      <div class="field-label">Break penalties <span class="tag tag-specialty">CA / CO</span></div>
-      <div class="damages-grid">
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('meal_breaks')"><input type="checkbox" class="damage-check" id="meal_breaks" onclick="event.stopPropagation();chk('meal_breaks')"><div class="damage-info"><div class="damage-name">Meal break premiums</div><div class="damage-desc">SOL Workweeks × Base Rate × Missed Meals per Week. CA: 1 hr pay. CO: 0.5 hr pay per missed break.</div></div></div>
-          <div class="damage-extra" id="x_meal_breaks"><textarea placeholder="e.g. CA only; use actual punch data; 3 per week placeholder..."></textarea></div>
-        </div>
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('rest_breaks')"><input type="checkbox" class="damage-check" id="rest_breaks" onclick="event.stopPropagation();chk('rest_breaks')"><div class="damage-info"><div class="damage-name">Rest break premiums</div><div class="damage-desc">SOL Workweeks × Base Rate × Missed Rest Breaks per Week. CA: 1 hr pay. CO: 1/6 hr pay per missed break.</div></div></div>
-          <div class="damage-extra" id="x_rest_breaks"><textarea placeholder="e.g. CA only; use actual punch data; 1 per week placeholder..."></textarea></div>
-        </div>
+    <div class="fg">
+      <div class="fl">Wage statement &amp; notice penalties <span class="tag tag-sp">NY / CA</span></div>
+      <div class="dg">
+        <div class="di"><div class="dr" onclick="chk('wage_stmt')"><input type="checkbox" class="dc" id="wage_stmt" onclick="event.stopPropagation();chk('wage_stmt')"><div class="di-info"><div class="dn">Wage statement penalties</div><div class="dd">NY: MIN($250 × workweeks × 5, $5,000). CA: $50 first period, $100 subsequent, max $4,000.</div></div></div><div class="dx" id="x_wage_stmt"><textarea placeholder="SOL date, applicable states, caveats..."></textarea></div></div>
+        <div class="di"><div class="dr" onclick="chk('wage_notice')"><input type="checkbox" class="dc" id="wage_notice" onclick="event.stopPropagation();chk('wage_notice')"><div class="di-info"><div class="dn">Wage notice penalties</div><div class="dd">NY only: MIN($50 × workweeks × 5, $5,000) per employee.</div></div></div><div class="dx" id="x_wage_notice"><textarea placeholder="SOL date, caveats..."></textarea></div></div>
       </div>
     </div>
-
-    <div class="field-group">
-      <div class="field-label">Wage statement &amp; notice penalties <span class="tag tag-specialty">NY / CA</span></div>
-      <div class="damages-grid">
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('wage_stmt')"><input type="checkbox" class="damage-check" id="wage_stmt" onclick="event.stopPropagation();chk('wage_stmt')"><div class="damage-info"><div class="damage-name">Wage statement penalties</div><div class="damage-desc">NY: MIN($250 × workweeks × 5, $5,000). CA: $50 first pay period, $100 each subsequent, max $4,000.</div></div></div>
-          <div class="damage-extra" id="x_wage_stmt"><textarea placeholder="SOL date, applicable states, additional notes..."></textarea></div>
-        </div>
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('wage_notice')"><input type="checkbox" class="damage-check" id="wage_notice" onclick="event.stopPropagation();chk('wage_notice')"><div class="damage-info"><div class="damage-name">Wage notice penalties</div><div class="damage-desc">NY only: MIN($50 × workweeks × 5, $5,000) per employee.</div></div></div>
-          <div class="damage-extra" id="x_wage_notice"><textarea placeholder="SOL date, additional notes..."></textarea></div>
-        </div>
+    <div class="fg">
+      <div class="fl">Post-separation &amp; waiting time <span class="tag tag-sp">CA</span></div>
+      <div class="dg">
+        <div class="di"><div class="dr" onclick="chk('post_sep')"><input type="checkbox" class="dc" id="post_sep" onclick="event.stopPropagation();chk('post_sep')"><div class="di-info"><div class="dn">Post-separation waiting time penalty</div><div class="dd">CA only, terminated employees: Last Base Rate × 8 × 30.</div></div></div><div class="dx" id="x_post_sep"><textarea placeholder="SOL date, terminated vs. active notes..."></textarea></div></div>
       </div>
     </div>
-
-    <div class="field-group">
-      <div class="field-label">Post-separation &amp; waiting time <span class="tag tag-specialty">CA</span></div>
-      <div class="damages-grid">
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('post_sep')"><input type="checkbox" class="damage-check" id="post_sep" onclick="event.stopPropagation();chk('post_sep')"><div class="damage-info"><div class="damage-name">Post-separation waiting time penalty</div><div class="damage-desc">CA only, terminated employees: Last Base Rate × 8 × 30.</div></div></div>
-          <div class="damage-extra" id="x_post_sep"><textarea placeholder="SOL date, notes on terminated vs. active employees..."></textarea></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="field-group">
-      <div class="field-label">PAGA <span class="tag tag-specialty">CA only</span></div>
-      <div class="damages-grid">
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('paga')"><input type="checkbox" class="damage-check" id="paga" onclick="event.stopPropagation();chk('paga')"><div class="damage-info"><div class="damage-name">PAGA penalties</div><div class="damage-desc">Per-pay-period CA labor code penalties. Report separately from other CA damages; provide standalone and aggregate totals.</div></div></div>
-          <div class="damage-extra" id="x_paga">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-              <label style="font-size:12px;white-space:nowrap">PAGA SOL start:</label>
-              <input type="date" id="pagaSOL" style="width:150px;font-size:12px">
-            </div>
-            <div style="font-size:12px;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">PAGA categories</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px">
+    <div class="fg">
+      <div class="fl">PAGA <span class="tag tag-sp">CA only</span></div>
+      <div class="dg">
+        <div class="di">
+          <div class="dr" onclick="chk('paga')"><input type="checkbox" class="dc" id="paga" onclick="event.stopPropagation();chk('paga')"><div class="di-info"><div class="dn">PAGA penalties</div><div class="dd">Per-pay-period CA labor code penalties. Report separately from other CA damages.</div></div></div>
+          <div class="dx" id="x_paga">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap"><label style="font-size:12px;white-space:nowrap">PAGA SOL start:</label><input type="date" id="pagaSOL" style="width:145px"></div>
+            <div style="font-size:11px;font-weight:700;color:#444;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">PAGA categories</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:8px">
               <label style="font-size:12px"><input type="checkbox" checked> OT ($50/pay period)</label>
               <label style="font-size:12px"><input type="checkbox" checked> Meal breaks ($50/pay period)</label>
               <label style="font-size:12px"><input type="checkbox" checked> Rest breaks ($50/pay period)</label>
@@ -406,564 +439,341 @@ pre.instructions{background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;p
               <label style="font-size:12px"><input type="checkbox"> Expense reimbursement ($100/pay period)</label>
               <label style="font-size:12px"><input type="checkbox"> Failure to pay timely ($100/pay period)</label>
             </div>
-            <textarea placeholder="Additional notes on PAGA calculation, pay period type, SOL specifics..."></textarea>
+            <textarea placeholder="SOL, pay period type, categories to prioritize, caveats..."></textarea>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="field-group">
-      <div class="field-label">Other damages <span class="tag tag-optional">case-specific</span></div>
-      <div class="damages-grid">
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('min_wage_liq')"><input type="checkbox" class="damage-check" id="min_wage_liq" onclick="event.stopPropagation();chk('min_wage_liq')"><div class="damage-info"><div class="damage-name">Minimum wage liquidated damages</div><div class="damage-desc">State minimum wage × OT Hours Variable × SOL Workweeks.</div></div></div>
-          <div class="damage-extra" id="x_min_wage_liq">
-            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
-              <label style="font-size:12px;white-space:nowrap">Min wage: $</label>
-              <input type="number" id="minWageRate" value="17.14" step=".01" style="width:75px">
-              <select id="minWageState" style="flex:1;font-size:12px"><option>CA ($16.95)</option><option>NY ($17.00)</option><option>MA ($15.00)</option><option>CO ($15.16)</option><option>Federal ($7.25)</option><option>Other</option></select>
-            </div>
-            <textarea placeholder="Additional notes..."></textarea>
-          </div>
-        </div>
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('rsu')"><input type="checkbox" class="damage-check" id="rsu" onclick="event.stopPropagation();chk('rsu')"><div class="damage-info"><div class="damage-name">RSU damages</div><div class="damage-desc">Overtime underpayment from improper exclusion of RSU value from regular rate. Requires vesting records.</div></div></div>
-          <div class="damage-extra" id="x_rsu"><textarea placeholder="Notes on RSU data, vesting periods, relevant columns..."></textarea></div>
-        </div>
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('tipped')"><input type="checkbox" class="damage-check" id="tipped" onclick="event.stopPropagation();chk('tipped')"><div class="damage-info"><div class="damage-name">Tipped minimum wage / tip credit damages</div><div class="damage-desc">(Min Wage – Cash Wage) × Hours. Used when tip credit is unlawfully applied.</div></div></div>
-          <div class="damage-extra" id="x_tipped"><textarea placeholder="Cash wage rate, applicable jurisdiction, additional notes..."></textarea></div>
-        </div>
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('spread')"><input type="checkbox" class="damage-check" id="spread" onclick="event.stopPropagation();chk('spread')"><div class="damage-info"><div class="damage-name">NY spread of hours pay</div><div class="damage-desc">Extra 1 hour at minimum wage for any workday where spread exceeds 10 hours. NY only.</div></div></div>
-          <div class="damage-extra" id="x_spread"><textarea placeholder="Additional notes..."></textarea></div>
-        </div>
-        <div class="damage-item">
-          <div class="damage-row" onclick="chk('other_damage')"><input type="checkbox" class="damage-check" id="other_damage" onclick="event.stopPropagation();chk('other_damage')"><div class="damage-info"><div class="damage-name">Other</div><div class="damage-desc">Any additional damage category not listed above.</div></div></div>
-          <div class="damage-extra" id="x_other_damage"><textarea placeholder="Describe the damage category, formula, applicable SOL, jurisdiction, and any other relevant details..." rows="4"></textarea></div>
-        </div>
+    <div class="fg">
+      <div class="fl">Other damages <span class="tag tag-opt">case-specific</span></div>
+      <div class="dg">
+        <div class="di"><div class="dr" onclick="chk('min_wage_liq')"><input type="checkbox" class="dc" id="min_wage_liq" onclick="event.stopPropagation();chk('min_wage_liq')"><div class="di-info"><div class="dn">Minimum wage liquidated damages</div><div class="dd">State min wage × OT Hours × SOL Workweeks.</div></div></div><div class="dx" id="x_min_wage_liq"><div style="display:flex;gap:8px;align-items:center;margin-bottom:7px;flex-wrap:wrap"><label style="font-size:12px">Min wage: $</label><input type="number" id="minWageRate" value="17.14" step=".01" style="width:68px"><select id="minWageState" style="flex:1"><option>CA ($16.95)</option><option>NY ($17.00)</option><option>MA ($15.00)</option><option>CO ($15.16)</option><option>Federal ($7.25)</option><option>Other</option></select></div><textarea placeholder="Notes..."></textarea></div></div>
+        <div class="di"><div class="dr" onclick="chk('rsu')"><input type="checkbox" class="dc" id="rsu" onclick="event.stopPropagation();chk('rsu')"><div class="di-info"><div class="dn">RSU damages</div><div class="dd">Overtime underpayment from exclusion of RSU value from regular rate.</div></div></div><div class="dx" id="x_rsu"><textarea placeholder="RSU data fields, vesting periods, stock price source..."></textarea></div></div>
+        <div class="di"><div class="dr" onclick="chk('tipped')"><input type="checkbox" class="dc" id="tipped" onclick="event.stopPropagation();chk('tipped')"><div class="di-info"><div class="dn">Tipped minimum wage / tip credit damages</div><div class="dd">(Min Wage – Cash Wage) × Hours. Used when tip credit is unlawfully applied.</div></div></div><div class="dx" id="x_tipped"><textarea placeholder="Cash wage rate, jurisdiction, tip credit amount..."></textarea></div></div>
+        <div class="di"><div class="dr" onclick="chk('spread')"><input type="checkbox" class="dc" id="spread" onclick="event.stopPropagation();chk('spread')"><div class="di-info"><div class="dn">NY spread of hours pay</div><div class="dd">Extra 1 hour at minimum wage for workdays where spread exceeds 10 hours. NY only.</div></div></div><div class="dx" id="x_spread"><textarea placeholder="Notes..."></textarea></div></div>
+        <div class="di"><div class="dr" onclick="chk('other_damage')"><input type="checkbox" class="dc" id="other_damage" onclick="event.stopPropagation();chk('other_damage')"><div class="di-info"><div class="dn">Other</div><div class="dd">Any additional damage category not listed above.</div></div></div><div class="dx" id="x_other_damage"><textarea placeholder="Describe the category, formula, SOL, jurisdiction, and all relevant details..." rows="4"></textarea></div></div>
       </div>
     </div>
-
   </div>
 </div>
 
 <!-- 6. MERITS -->
 <div class="section" id="sec-merits">
-  <div class="section-header" onclick="tog('sec-merits')">
-    <div class="section-title">6. Merit analyses</div>
-    <div class="section-subtitle">Additional analyses to assess exemption risk</div>
-    <div class="chevron">▼</div>
-  </div>
-  <div class="section-body">
-    <div class="damages-grid">
-      <div class="damage-item">
-        <div class="damage-row" onclick="chk('merits_7i')"><input type="checkbox" class="damage-check" id="merits_7i" onclick="event.stopPropagation();chk('merits_7i')"><div class="damage-info"><div class="damage-name">7i merits analysis</div><div class="damage-desc">Report employees where incentive pay (bonus + commission) exceeds regular pay, on a yearly basis.</div></div></div>
-        <div class="damage-extra" id="x_merits_7i"><textarea placeholder="Additional notes on 7i analysis, data fields, threshold variations..."></textarea></div>
-      </div>
-      <div class="damage-item">
-        <div class="damage-row" onclick="chk('merits_hce')"><input type="checkbox" class="damage-check" id="merits_hce" onclick="event.stopPropagation();chk('merits_hce')"><div class="damage-info"><div class="damage-name">HCE merits analysis</div><div class="damage-desc">Report non-CA, non-NY employees above HCE threshold. Annualize partial years. CO has separate thresholds.</div></div></div>
-        <div class="damage-extra" id="x_merits_hce">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;font-size:12px">
-            <div style="display:flex;gap:6px;align-items:center"><label>Pre-6/30/2024:</label><input type="text" value="$107,432" style="width:90px;font-size:12px"></div>
-            <div style="display:flex;gap:6px;align-items:center"><label>Post-7/1/2024:</label><input type="text" value="$132,964" style="width:90px;font-size:12px"></div>
-          </div>
-          <textarea placeholder="CO-specific thresholds, annualization notes..."></textarea>
-        </div>
-      </div>
-      <div class="damage-item">
-        <div class="damage-row" onclick="chk('severance')"><input type="checkbox" class="damage-check" id="severance" onclick="event.stopPropagation();chk('severance')"><div class="damage-info"><div class="damage-name">Severance workweek analysis</div><div class="damage-desc">Aggregate and display severance workweeks separately on summary. Include in total workweeks.</div></div></div>
-        <div class="damage-extra" id="x_severance"><textarea placeholder="Column reference for severance flag, date fields to use..."></textarea></div>
-      </div>
-      <div class="damage-item">
-        <div class="damage-row" onclick="chk('arbitration')"><input type="checkbox" class="damage-check" id="arbitration" onclick="event.stopPropagation();chk('arbitration')"><div class="damage-info"><div class="damage-name">Arbitration workweek analysis</div><div class="damage-desc">Aggregate and display arbitration workweeks separately on summary. Include in total workweeks.</div></div></div>
-        <div class="damage-extra" id="x_arbitration"><textarea placeholder="Column reference for arbitration flag, additional notes..."></textarea></div>
-      </div>
+  <div class="sh" onclick="tog('sec-merits')"><div class="st">6. Merit analyses</div><div class="ss">Exemption risk, time analyses, headcount breakouts</div><div class="chev">▼</div></div>
+  <div class="sb">
+    <div class="dg">
+      <div class="di"><div class="dr" onclick="chk('merits_7i')"><input type="checkbox" class="dc" id="merits_7i" onclick="event.stopPropagation();chk('merits_7i')"><div class="di-info"><div class="dn">7i merits analysis</div><div class="dd">Employees where incentive pay exceeds regular pay, yearly.</div></div></div><div class="dx" id="x_merits_7i"><textarea placeholder="Notes, data fields, threshold variations..."></textarea></div></div>
+      <div class="di"><div class="dr" onclick="chk('merits_hce')"><input type="checkbox" class="dc" id="merits_hce" onclick="event.stopPropagation();chk('merits_hce')"><div class="di-info"><div class="dn">HCE merits analysis</div><div class="dd">Non-CA, non-NY employees above HCE threshold. Annualize partial years. CO has separate thresholds.</div></div></div><div class="dx" id="x_merits_hce"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:7px"><div style="display:flex;gap:5px;align-items:center;font-size:12px"><label>Pre-6/30/2024:</label><input type="text" value="$107,432" style="width:85px;font-size:12px"></div><div style="display:flex;gap:5px;align-items:center;font-size:12px"><label>Post-7/1/2024:</label><input type="text" value="$132,964" style="width:85px;font-size:12px"></div></div><textarea placeholder="CO thresholds, annualization notes..."></textarea></div></div>
+      <div class="di"><div class="dr" onclick="chk('proxy_time')"><input type="checkbox" class="dc" id="proxy_time" onclick="event.stopPropagation();chk('proxy_time')"><div class="di-info"><div class="dn">Proxy time / off-the-clock analysis</div><div class="dd">Time analysis to establish uncompensated work — login/logout data, badge records, call logs, email timestamps. Feeds into damages as merits basis for OT claims.</div></div></div><div class="dx" id="x_proxy_time"><textarea placeholder="Data source (Aircall, Zoom, badge data), aggregation method, toggles for time outside systems and breaks, summary stats needed..."></textarea></div></div>
+      <div class="di"><div class="dr" onclick="chk('severance')"><input type="checkbox" class="dc" id="severance" onclick="event.stopPropagation();chk('severance')"><div class="di-info"><div class="dn">Severance — headcount &amp; workweeks</div><div class="dd">Report headcount and workweeks for employees with severance agreements. Include in total workweeks; display separately on summary.</div></div></div><div class="dx" id="x_severance"><textarea placeholder="Column reference for severance flag, whether to exclude from damages totals..."></textarea></div></div>
+      <div class="di"><div class="dr" onclick="chk('arbitration')"><input type="checkbox" class="dc" id="arbitration" onclick="event.stopPropagation();chk('arbitration')"><div class="di-info"><div class="dn">Arbitration — headcount &amp; workweeks</div><div class="dd">Report headcount and workweeks for employees subject to arbitration. Include in total workweeks; display separately on summary.</div></div></div><div class="dx" id="x_arbitration"><textarea placeholder="Column reference, whether to exclude from damages totals..."></textarea></div></div>
     </div>
-    <div class="notes-block">
-      <label class="field-label">Additional notes</label>
-      <textarea id="meritsNotes" placeholder="Any other merit analysis instructions or special cases..."></textarea>
-    </div>
+    <div class="nb"><label class="fl">Additional notes</label><textarea id="meritsNotes" placeholder="Other analyses, special cases, instructions..."></textarea></div>
   </div>
 </div>
 
 <!-- 7. PRESENTATION -->
 <div class="section" id="sec-presentation">
-  <div class="section-header" onclick="tog('sec-presentation')">
-    <div class="section-title">7. Presentation preferences</div>
-    <div class="section-subtitle">How to format the summary page and outputs</div>
-    <div class="chevron">▼</div>
-  </div>
-  <div class="section-body">
-    <div class="field-group">
-      <label class="field-label">Summary page breakouts</label>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <label style="font-size:13px"><input type="checkbox" id="pres_by_state" checked> Break out damages by state / jurisdiction</label>
-        <label style="font-size:13px"><input type="checkbox" id="pres_by_year"> Break out damages by year</label>
-        <label style="font-size:13px"><input type="checkbox" id="pres_per_ee" checked> Report damages per employee per year</label>
-        <label style="font-size:13px"><input type="checkbox" id="pres_extrapolated" checked> Show both extrapolated and un-extrapolated workweeks and headcounts</label>
-        <label style="font-size:13px"><input type="checkbox" id="pres_with_without_liq"> Show totals with and without liquidated / treble damages</label>
-        <label style="font-size:13px"><input type="checkbox" id="pres_paga_sep"> Show PAGA separately from other CA damages (plus aggregate)</label>
+  <div class="sh" onclick="tog('sec-presentation')"><div class="st">7. Presentation preferences</div><div class="ss">Summary page format and output structure</div><div class="chev">▼</div></div>
+  <div class="sb">
+    <div class="fg">
+      <label class="fl">Summary page breakouts</label>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <label style="font-size:13px"><input type="checkbox" id="pres_by_state" checked> Break out by state / jurisdiction</label>
+        <label style="font-size:13px"><input type="checkbox" id="pres_by_year"> Break out by year</label>
+        <label style="font-size:13px"><input type="checkbox" id="pres_per_ee" checked> Damages per employee per year</label>
+        <label style="font-size:13px"><input type="checkbox" id="pres_extrapolated" checked> Both extrapolated and un-extrapolated workweeks / headcounts</label>
+        <label style="font-size:13px"><input type="checkbox" id="pres_with_without_liq"> Totals with and without liquidated / treble damages</label>
+        <label style="font-size:13px"><input type="checkbox" id="pres_paga_sep"> PAGA separate from other CA damages (plus aggregate)</label>
       </div>
     </div>
-    <div class="field-group">
-      <label class="field-label">Headcount breakouts needed</label>
-      <input type="text" id="headcountBreakouts" placeholder="e.g. By state, by job title, active vs. terminated, by year...">
+    <div class="g2" style="margin-top:11px">
+      <div class="fg"><label class="fl">Headcount breakouts</label><input type="text" id="headcountBreakouts" placeholder="e.g. By state, job title, active vs. terminated..."></div>
+      <div class="fg"><label class="fl">Special job title headcounts</label><input type="text" id="titleHeadcounts" placeholder="e.g. All 'Account Manager' and 'Sales' titles..."></div>
     </div>
-    <div class="field-group">
-      <label class="field-label">Special job title headcounts</label>
-      <input type="text" id="titleHeadcounts" placeholder="e.g. All 'Account Manager' titles, all 'Sales' titles...">
-    </div>
-    <div class="field-group">
-      <label class="field-label">Additional presentation notes</label>
-      <textarea id="presentationNotes" placeholder="Any other formatting or reporting preferences..."></textarea>
-    </div>
+    <div class="nb"><label class="fl">Additional presentation notes</label><textarea id="presentationNotes" placeholder="Tab structure, formatting, other reporting preferences..."></textarea></div>
   </div>
 </div>
 
-<!-- 8. ADDITIONAL NOTES -->
+<!-- 8. ADDITIONAL -->
 <div class="section" id="sec-notes">
-  <div class="section-header" onclick="tog('sec-notes')">
-    <div class="section-title">8. Additional notes &amp; instructions</div>
-    <div class="section-subtitle">Anything not covered above</div>
-    <div class="chevron">▼</div>
-  </div>
-  <div class="section-body">
-    <div class="field-group">
-      <label class="field-label">Data cleaning / special instructions</label>
-      <textarea id="dataCleaningNotes" placeholder="e.g. Use only specific columns; handle multi-state employees a certain way; pay period is biweekly..." rows="3"></textarea>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Other case-specific analyses or notes</label>
-      <textarea id="otherNotes" placeholder="e.g. Activity log analysis; daily/weekly aggregates; special rate calculation instructions..." rows="3"></textarea>
-    </div>
+  <div class="sh" onclick="tog('sec-notes')"><div class="st">8. Additional notes</div><div class="ss">Anything not covered above</div><div class="chev">▼</div></div>
+  <div class="sb">
+    <div class="fg"><label class="fl">Data cleaning / special instructions</label><textarea id="dataCleaningNotes" placeholder="Column usage, multi-state employee treatment, specific tabs..." rows="3"></textarea></div>
+    <div class="fg"><label class="fl">Other case-specific notes</label><textarea id="otherNotes" placeholder="Any other instructions or context for the data team..." rows="3"></textarea></div>
   </div>
 </div>
 
-<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;flex-wrap:wrap">
-  <button class="btn-secondary" onclick="if(confirm('Clear all fields?'))location.reload()">Clear form</button>
-  <button class="btn-secondary" onclick="generate()">Preview instructions</button>
-  <button class="btn-primary" onclick="generateAndEmail()">Generate &amp; send via Outlook ✉</button>
+<!-- ACTION BAR -->
+<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+  <button class="btn btn-sm" onclick="if(confirm('Clear all fields?'))location.reload()">Clear form</button>
+  <button class="btn" onclick="previewInstructions()">Preview</button>
+  <button class="btn btn-amber" onclick="saveDraft()">💾 Save draft &amp; Word</button>
+  <button class="btn" id="approveBtn" style="display:none;background:#1d4ed8;color:white;border-color:#1d4ed8" onclick="markApproved()">✓ Mark as reviewed &amp; approved</button>
+  <button class="btn btn-green" id="finalizeBtn" onclick="finalizeAndSubmit()">✉ Finalize &amp; submit</button>
+</div>
+<div id="approvedBanner" style="display:none;margin-top:8px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:13px;color:#15803d;align-items:center;gap:8px">
+  <span>✓ Marked as reviewed and approved — ready to finalize.</span>
 </div>
 
-</div>
-
-<!-- Modal -->
-<div class="summary-modal" id="summaryModal">
-  <div class="summary-box">
-    <div class="summary-box-header">
-      <h2>Generated damages instructions</h2>
-      <button class="close-btn" onclick="document.getElementById('summaryModal').classList.remove('open')">✕</button>
-    </div>
-    <pre class="instructions" id="instructionsText"></pre>
-    <div class="copy-area">
-      <button class="btn-primary" style="flex:1" onclick="copyIt()">Copy to clipboard</button>
-      <button class="btn-secondary" style="flex:1" onclick="document.getElementById('summaryModal').classList.remove('open')">Close</button>
-    </div>
-  </div>
-</div>
+</div><!-- end .app -->
 
 <script>
-const DOMAIN = '@outtengolden.com';
-const STATE_DEFS = [
-  {id:'flsa', name:'FLSA (All Others)', note:'2–3 yr SOL', always:true},
-  {id:'ca',   name:'California',        note:'3–4 yr SOL'},
-  {id:'ny',   name:'New York',          note:'6 yr SOL'},
-  {id:'ma',   name:'Massachusetts',     note:'3 yr SOL'},
-  {id:'co',   name:'Colorado',          note:'2–3 yr SOL'},
-  {id:'il',   name:'Illinois',          note:'3 yr SOL'},
-  {id:'other',name:'Other States',      note:'Click to select'},
+const DOMAIN='@outtengolden.com';
+const SOL_DEF={ca:'4yr',ny:'6yr',ma:'3yr',co:'3yr',il:'3yr'};
+const STATE_DEFS=[
+  {id:'flsa',name:'FLSA (Federal)',  note:'2–3 yr SOL', default:true},
+  {id:'ca',  name:'California',      note:'3–4 yr SOL'},
+  {id:'ny',  name:'New York',        note:'6 yr SOL'},
+  {id:'ma',  name:'Massachusetts',   note:'3 yr SOL'},
+  {id:'co',  name:'Colorado',        note:'2–3 yr SOL'},
+  {id:'il',  name:'Illinois',        note:'3 yr SOL'},
+  {id:'other',name:'Other States',   note:'Click to select'},
 ];
-const SOL_DEFAULTS = {ca:'4yr', ny:'6yr', ma:'3yr', co:'3yr', il:'3yr'};
-const OTHER_STATES = [
-  'Alabama','Alaska','Arizona','Arkansas','Connecticut','Delaware','Florida','Georgia',
-  'Hawaii','Idaho','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland',
-  'Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada',
-  'New Hampshire','New Jersey','New Mexico','North Carolina','North Dakota','Ohio',
-  'Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota',
-  'Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia',
-  'Wisconsin','Wyoming'
-];
+const OTHER_STATES=['Alabama','Alaska','Arizona','Arkansas','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+let isDraft=false, rc=0, cc=0, np=0, lc=0;
 
-// ── UI helpers ────────────────────────────────────────────────
-function tog(id){ document.getElementById(id).classList.toggle('open'); }
+// ── helpers ──────────────────────────────────────────────────
+function tog(id){document.getElementById(id).classList.toggle('open');}
+function chk(id){const cb=document.getElementById(id);if(!cb)return;const ex=document.getElementById('x_'+id);if(ex)ex.classList.toggle('vis',cb.checked);updateProg();}
+function v(id){return(document.getElementById(id)||{}).value||'';}
+function isChk(id){return!!(document.getElementById(id)||{}).checked;}
+function updateProg(){let s=0;if(v('attyFirst')&&v('attyLast'))s+=34;if(v('caseName'))s+=33;const any=STATE_DEFS.some(sd=>document.getElementById('sc_'+sd.id)?.classList.contains('sel'));if(any)s+=33;document.getElementById('progressFill').style.width=s+'%';}
 
-function chk(id){
-  const cb = document.getElementById(id);
-  if(!cb) return;
-  const ex = document.getElementById('x_'+id);
-  if(ex) ex.classList.toggle('visible', cb.checked);
-  updateProg();
+// ── paste modal ──────────────────────────────────────────────
+function openPasteModal(){
+  document.getElementById('pasteJsonInput').value='';
+  document.getElementById('pasteError').style.display='none';
+  document.getElementById('pasteOverlay').classList.add('open');
+}
+function closePasteModal(){document.getElementById('pasteOverlay').classList.remove('open');}
+function loadFromPaste(){
+  const raw=document.getElementById('pasteJsonInput').value.trim();
+  const errEl=document.getElementById('pasteError');
+  errEl.style.display='none';
+  if(!raw){errEl.textContent='Please paste your JSON first.';errEl.style.display='block';return;}
+  try{
+    const s=JSON.parse(raw);
+    closePasteModal();
+    applyState(s);
+    isDraft=true;
+    document.getElementById('draftBadge').classList.add('visible');
+    document.getElementById('ws2').classList.add('done');
+    document.getElementById('ws3').classList.add('active');
+    document.getElementById('approveBtn').style.display='inline-flex';
+    alert('Draft loaded successfully. Review and make any edits, then approve and submit.');
+  }catch(err){errEl.textContent='Invalid JSON: '+err.message;errEl.style.display='block';}
 }
 
-function v(id){ return (document.getElementById(id)||{}).value || ''; }
-function isChk(id){ return !!(document.getElementById(id)||{}).checked; }
-
-function updateProg(){
-  let s = 0;
-  if(v('attyFirst') && v('attyLast')) s += 20;
-  if(v('caseName'))        s += 20;
-  if(v('dataEndDate'))     s += 20;
-  if(v('extrapolationDate')) s += 20;
-  const anyState = STATE_DEFS.some(sd => !sd.always && document.getElementById('sc_'+sd.id)?.classList.contains('selected'));
-  if(anyState) s += 20;
-  document.getElementById('progressFill').style.width = s + '%';
-}
-
-// ── Email helpers ─────────────────────────────────────────────
-function toEmail(first, last){
-  if(!first || !last) return '';
-  return (first.trim()[0] + last.trim()).toLowerCase().replace(/\s+/g,'') + DOMAIN;
-}
-
+// ── email ────────────────────────────────────────────────────
+function toEmail(f,l){return f&&l?(f.trim()[0]+l.trim()).toLowerCase().replace(/\s+/g,'')+DOMAIN:'';}
 function previewEmails(){
-  const f = v('attyFirst'), l = v('attyLast');
-  const ep = document.getElementById('attyEmailPreview');
-  if(ep) ep.textContent = (f && l) ? 'Email: ' + toEmail(f,l) : '';
-  document.querySelectorAll('.recip-row').forEach(r => {
-    const rf = r.querySelector('.recip-first').value;
-    const rl = r.querySelector('.recip-last').value;
-    r.querySelector('.recip-preview').textContent = (rf && rl) ? toEmail(rf,rl) : '';
-  });
+  const af=v('attyFirst'),al=v('attyLast');
+  const ep=document.getElementById('attyEmailPreview');if(ep)ep.textContent=(af&&al)?'→ '+toEmail(af,al):'';
+  const pf=v('partnerFirst'),pl=v('partnerLast');
+  const pp=document.getElementById('partnerEmailPreview');if(pp)pp.textContent=(pf&&pl)?'→ '+toEmail(pf,pl):'';
+  document.querySelectorAll('.rr').forEach(r=>{const rf=r.querySelector('.rf')?.value,rl=r.querySelector('.rl')?.value;const rp=r.querySelector('.rp');if(rp)rp.textContent=(rf&&rl)?toEmail(rf,rl):'';});
+  document.querySelectorAll('.cc-row').forEach(r=>{const cf=r.querySelector('.ccf')?.value,cl=r.querySelector('.ccl')?.value;const cp=r.querySelector('.ccp');if(cp)cp.textContent=(cf&&cl)?toEmail(cf,cl):'';});
 }
+function addRecipient(){rc++;const id='r_'+rc;const d=document.createElement('div');d.className='rr';d.id=id;d.innerHTML='<input type="text" class="rf" placeholder="First name" style="flex:1;min-width:85px" oninput="previewEmails()"><input type="text" class="rl" placeholder="Last name" style="flex:1;min-width:100px" oninput="previewEmails()"><span class="rp"></span><button class="frm" onclick="document.getElementById(\''+id+'\').remove()" title="Remove">✕</button>';document.getElementById('recipientList').appendChild(d);}
+function addCC(){cc++;const id='cc_'+cc;const d=document.createElement('div');d.className='cc-row';d.id=id;d.innerHTML='<input type="text" class="ccf" placeholder="First name" style="flex:1;min-width:85px" oninput="previewEmails()"><input type="text" class="ccl" placeholder="Last name" style="flex:1;min-width:100px" oninput="previewEmails()"><span class="ccp" style="font-size:12px;color:#888;min-width:150px;flex-shrink:0"></span><button class="frm" onclick="document.getElementById(\''+id+'\').remove()" title="Remove">✕</button>';document.getElementById('ccList').appendChild(d);}
+function getRecipEmails(){return Array.from(document.querySelectorAll('.rr')).map(r=>toEmail(r.querySelector('.rf')?.value?.trim(),r.querySelector('.rl')?.value?.trim())).filter(Boolean);}
+function getRecipNames(){return Array.from(document.querySelectorAll('.rr')).map(r=>{const f=r.querySelector('.rf')?.value?.trim(),l=r.querySelector('.rl')?.value?.trim();return(f&&l)?f+' '+l:'';}).filter(Boolean);}
+function getCCEmails(){const e=[];const pf=v('partnerFirst'),pl=v('partnerLast');if(pf&&pl)e.push(toEmail(pf,pl));document.querySelectorAll('.cc-row').forEach(r=>{const f=r.querySelector('.ccf')?.value?.trim(),l=r.querySelector('.ccl')?.value?.trim();if(f&&l)e.push(toEmail(f,l));});return e;}
 
-let recipCount = 0;
-function addRecipient(){
-  recipCount++;
-  const id = 'recip_' + recipCount;
-  const div = document.createElement('div');
-  div.className = 'recip-row'; div.id = id;
-  div.innerHTML =
-    '<input type="text" class="recip-first" placeholder="First name" style="flex:1;min-width:100px" oninput="previewEmails()">' +
-    '<input type="text" class="recip-last"  placeholder="Last name"  style="flex:1;min-width:120px" oninput="previewEmails()">' +
-    '<span class="recip-preview"></span>' +
-    '<button class="file-remove" onclick="document.getElementById(\'' + id + '\').remove()" title="Remove">✕</button>';
-  document.getElementById('recipientList').appendChild(div);
-}
+// ── named plaintiffs ─────────────────────────────────────────
+function addNP(){np++;const id='np_'+np;const d=document.createElement('div');d.className='np-row';d.id=id;d.innerHTML='<input type="text" placeholder="Full name" style="flex:2"><input type="text" placeholder="Unique ID (if known)" style="flex:1"><button class="frm" onclick="document.getElementById(\''+id+'\').remove()" title="Remove">✕</button>';document.getElementById('npList').appendChild(d);}
 
-function getRecipientEmails(){
-  return Array.from(document.querySelectorAll('.recip-row')).map(r => {
-    return toEmail(r.querySelector('.recip-first').value.trim(), r.querySelector('.recip-last').value.trim());
-  }).filter(Boolean);
-}
-function getRecipientNames(){
-  return Array.from(document.querySelectorAll('.recip-row')).map(r => {
-    const f = r.querySelector('.recip-first').value.trim();
-    const l = r.querySelector('.recip-last').value.trim();
-    return (f && l) ? f+' '+l : '';
-  }).filter(Boolean);
-}
+// ── files ────────────────────────────────────────────────────
+const uploadedFiles=[];
+function handleFiles(files){const ok=['xlsx','xls','csv','pdf'];Array.from(files).forEach(f=>{const ext=f.name.split('.').pop().toLowerCase();if(!ok.includes(ext)){alert('"'+f.name+'" not accepted. Use XLSX, XLS, CSV, or PDF.');return;}if(uploadedFiles.find(u=>u.name===f.name))return;uploadedFiles.push(f);renderFileList();});}
+function renderFileList(){const ic={xlsx:'📊',xls:'📊',csv:'📄',pdf:'📋'};document.getElementById('fileList').innerHTML=uploadedFiles.map((f,i)=>'<div class="fr"><span style="font-size:13px">'+(ic[f.name.split('.').pop().toLowerCase()]||'📁')+'</span><span class="fn">'+f.name+'</span><span class="fsi">'+((f.size/1024).toFixed(1))+' KB</span><button class="frm" onclick="removeFile('+i+')" title="Remove">✕</button></div>').join('');}
+function removeFile(i){uploadedFiles.splice(i,1);renderFileList();}
+function dragOver(e){e.preventDefault();document.getElementById('uploadZone').classList.add('drag');}
+function dragLeave(){document.getElementById('uploadZone').classList.remove('drag');}
+function dropFile(e){e.preventDefault();dragLeave();handleFiles(e.dataTransfer.files);}
+function addLink(){lc++;const id='lnk_'+lc;const d=document.createElement('div');d.className='link-row';d.id=id;d.style.cssText='display:flex;gap:8px;margin-bottom:7px';d.innerHTML='<input type="text" placeholder="https://..." style="flex:2"><input type="text" placeholder="Label (e.g. Workday Data)" style="flex:1"><button class="frm" onclick="document.getElementById(\''+id+'\').remove()" title="Remove">✕</button>';document.getElementById('linkList').appendChild(d);}
 
-// ── File upload ───────────────────────────────────────────────
-const uploadedFiles = [];
-function handleFiles(files){
-  const allowed = ['xlsx','xls','csv','pdf'];
-  Array.from(files).forEach(f => {
-    const ext = f.name.split('.').pop().toLowerCase();
-    if(!allowed.includes(ext)){
-      alert('"'+f.name+'" is not an accepted file type.\nAccepted: XLSX, XLS, CSV, PDF.\nPlease note this file in the Additional Notes field.');
-      return;
-    }
-    if(uploadedFiles.find(u => u.name===f.name)) return;
-    uploadedFiles.push(f);
-    renderFileList();
-    const rows = document.querySelectorAll('.data-source-row');
-    for(let r of rows){
-      const inp = r.querySelectorAll('input')[0];
-      if(!inp.value){ inp.value = f.name; break; }
-    }
-  });
-}
-function renderFileList(){
-  const icons = {xlsx:'📊',xls:'📊',csv:'📄',pdf:'📋'};
-  document.getElementById('fileList').innerHTML = uploadedFiles.map((f,i) => {
-    const ext = f.name.split('.').pop().toLowerCase();
-    return '<div class="file-row">' +
-      '<span class="file-icon">'+(icons[ext]||'📁')+'</span>' +
-      '<span class="file-name">'+f.name+'</span>' +
-      '<span class="file-size">'+((f.size/1024).toFixed(1))+' KB</span>' +
-      '<button class="file-remove" onclick="removeFile('+i+')" title="Remove">✕</button></div>';
-  }).join('');
-}
-function removeFile(i){ uploadedFiles.splice(i,1); renderFileList(); }
-function dragOver(e){ e.preventDefault(); document.getElementById('uploadZone').classList.add('drag'); }
-function dragLeave(){ document.getElementById('uploadZone').classList.remove('drag'); }
-function dropFile(e){ e.preventDefault(); dragLeave(); handleFiles(e.dataTransfer.files); }
-function addDataSource(){
-  const c = document.getElementById('dataSources');
-  const r = document.createElement('div');
-  r.className = 'data-source-row';
-  r.style.cssText = 'display:flex;gap:8px;margin-bottom:8px';
-  r.innerHTML = '<input type="text" placeholder="File name" style="flex:1.2"><input type="text" placeholder="Description" style="flex:2">';
-  c.appendChild(r);
-}
-
-// ── States ────────────────────────────────────────────────────
+// ── states ───────────────────────────────────────────────────
 function renderStates(){
-  document.getElementById('stateGrid').innerHTML = STATE_DEFS.map(s =>
-    '<div class="state-card'+(s.always?' selected':'')+'" id="sc_'+s.id+'" onclick="'+(s.always?'':s.id==='other'?'toggleOther()':"selState('"+s.id+"')")+'">' +
-    '<div class="state-name">'+s.name+'</div>' +
-    '<div class="state-note">'+(s.always?'✓ Always included':s.note)+'</div></div>'
-  ).join('');
-  document.getElementById('otherStateList').innerHTML = OTHER_STATES.map(s =>
-    '<label><input type="checkbox" value="'+s+'" onchange="updateSOLFields();showStateNotes()"> '+s+'</label>'
-  ).join('');
+  document.getElementById('stateGrid').innerHTML=STATE_DEFS.map(s=>'<div class="sc'+(s.default?' sel':'')+'" id="sc_'+s.id+'" onclick="'+(s.id==='other'?'toggleOther()':"selState('"+s.id+"')")+'">'+'<div class="sn">'+s.name+'</div><div class="sst">'+(s.default?'✓ Selected by default':s.note)+'</div></div>').join('');
+  document.getElementById('otherStateList').innerHTML=OTHER_STATES.map(s=>'<label><input type="checkbox" value="'+s+'" onchange="updateSOLFields();showStateNotes()"> '+s+'</label>').join('');
 }
-
-function selState(id){
-  document.getElementById('sc_'+id).classList.toggle('selected');
-  updateSOLFields(); showStateNotes();
-}
-
-function toggleOther(){
-  document.getElementById('sc_other').classList.toggle('selected');
-  const panel = document.getElementById('otherStatesPanel');
-  panel.classList.toggle('visible', document.getElementById('sc_other').classList.contains('selected'));
-  updateSOLFields(); showStateNotes();
-}
-
-function showStateNotes(){
-  const any = STATE_DEFS.some(s => !s.always && document.getElementById('sc_'+s.id)?.classList.contains('selected'));
-  document.getElementById('stateNotesBox').style.display = any ? 'block' : 'none';
-}
-
+function selState(id){document.getElementById('sc_'+id).classList.toggle('sel');updateSOLFields();showStateNotes();}
+function toggleOther(){document.getElementById('sc_other').classList.toggle('sel');document.getElementById('otherStatesPanel').classList.toggle('vis',document.getElementById('sc_other').classList.contains('sel'));updateSOLFields();showStateNotes();}
+function showStateNotes(){const any=STATE_DEFS.some(s=>document.getElementById('sc_'+s.id)?.classList.contains('sel'));document.getElementById('stateNotesBox').style.display=any?'block':'none';}
 function updateSOLFields(){
-  const specialty = STATE_DEFS.filter(s => !s.always && s.id!=='other' && document.getElementById('sc_'+s.id)?.classList.contains('selected'));
-  const otherChecked = Array.from(document.querySelectorAll('#otherStateList input:checked')).map(c => c.value);
-
-  const container = document.getElementById('solDates');
-  const fields    = document.getElementById('solFields');
-
-  if(!specialty.length && !otherChecked.length){ container.style.display='none'; return; }
-  container.style.display = 'block';
-
-  const solOpts = '<option value="2yr">2 years (FLSA)</option><option value="3yr">3 years</option><option value="4yr">4 years (CA UCL)</option><option value="6yr">6 years (NY)</option><option value="other">Other (see notes)</option>';
-
-  const row = (key, label, def) =>
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">' +
-    '<span style="width:160px;font-size:13px;font-weight:500;flex-shrink:0">'+label+'</span>' +
-    '<div style="display:flex;align-items:center;gap:6px;font-size:12px;flex-wrap:wrap">' +
-    '<label>SOL start:</label><input type="date" id="sol_'+key+'" style="width:140px">' +
-    '<label style="margin-left:8px">Length:</label>' +
-    '<select id="sollength_'+key+'" style="width:140px;font-size:12px">'+solOpts+'</select>' +
-    '</div></div>';
-
-  fields.innerHTML =
-    specialty.map(s => row(s.id, s.name, SOL_DEFAULTS[s.id]||'2yr')).join('') +
-    otherChecked.map(s => row('other_'+s.replace(/\s/g,'_'), s, '2yr')).join('');
-
-  // Apply defaults
-  specialty.forEach(s => {
-    const el = document.getElementById('sollength_'+s.id);
-    if(el) el.value = SOL_DEFAULTS[s.id] || '2yr';
-  });
+  const spec=STATE_DEFS.filter(s=>s.id!=='other'&&document.getElementById('sc_'+s.id)?.classList.contains('sel'));
+  const others=Array.from(document.querySelectorAll('#otherStateList input:checked')).map(c=>c.value);
+  const cont=document.getElementById('solDates');const flds=document.getElementById('solFields');
+  if(!spec.length&&!others.length){cont.style.display='none';return;}
+  cont.style.display='block';
+  const opts='<option value="2yr">2 years (FLSA)</option><option value="3yr">3 years</option><option value="4yr">4 years (CA UCL)</option><option value="6yr">6 years (NY)</option><option value="other">Other (see notes)</option>';
+  const row=(key,label)=>'<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;flex-wrap:wrap"><span style="width:150px;font-size:13px;font-weight:600;flex-shrink:0">'+label+'</span><div style="display:flex;align-items:center;gap:6px;font-size:12px;flex-wrap:wrap"><label>Start:</label><input type="date" id="sol_'+key+'" style="width:135px"><label style="margin-left:6px">Length:</label><select id="sollength_'+key+'" style="width:135px;font-size:12px">'+opts+'</select></div></div>';
+  flds.innerHTML=spec.map(s=>row(s.id,s.name)).join('')+others.map(s=>row('other_'+s.replace(/\s/g,'_'),s)).join('');
+  spec.forEach(s=>{const el=document.getElementById('sollength_'+s.id);if(el)el.value=SOL_DEF[s.id]||'2yr';});
   updateProg();
 }
 
-// ── Build instructions text ───────────────────────────────────
-function buildInstructions(){
-  const cn  = v('caseName') || '[Case Name]';
-  const de  = v('dataEndDate') || '[Data End Date]';
-  const ex  = v('extrapolationDate') || '[Extrapolation Date]';
-  const oh  = v('otHours');
-  const pw  = v('pctWorkweeks');
-  const mm  = v('missedMeals');
-  const mr  = v('missedRests');
-  const rb  = document.getElementById('rateBasis')?.value === '52' ? '52 weeks' : 'actual weeks worked in that calendar year';
-
-  const selStates   = STATE_DEFS.filter(s => s.always || document.getElementById('sc_'+s.id)?.classList.contains('selected'));
-  const otherChecked = Array.from(document.querySelectorAll('#otherStateList input:checked')).map(c => c.value);
-
-  // Data sources
-  let dsSrc = '';
-  document.querySelectorAll('.data-source-row').forEach(r => {
-    const ins = r.querySelectorAll('input');
-    if(ins[0].value) dsSrc += '\n  - ' + ins[0].value + ': ' + (ins[1].value || '(no description)');
-  });
-  if(uploadedFiles.length) dsSrc += '\n  Uploaded files: ' + uploadedFiles.map(f=>f.name).join(', ');
-
-  // SOL
-  let solTxt = '\n\nSTATUTE OF LIMITATIONS START DATES:';
-  selStates.forEach(s => {
-    if(s.always){ solTxt += '\n  - FLSA Collective: [SOL Start per case] – ' + ex; }
-    else {
-      const sv = document.getElementById('sol_'+s.id)?.value || '[TBD]';
-      const sl = document.getElementById('sollength_'+s.id)?.value || '[TBD]';
-      solTxt += '\n  - ' + s.name + ' Class: SOL start ' + sv + ', length ' + sl + ' – end ' + ex;
-    }
-  });
-  otherChecked.forEach(s => {
-    const key = 'other_' + s.replace(/\s/g,'_');
-    const sv = document.getElementById('sol_'+key)?.value || '[TBD]';
-    const sl = document.getElementById('sollength_'+key)?.value || '[TBD]';
-    solTxt += '\n  - ' + s + ': SOL start ' + sv + ', length ' + sl + ' – end ' + ex;
-  });
-
-  // Helper: pull textarea note from extra panel
-  const noteOf = id => {
-    const el = document.getElementById('x_'+id);
-    if(!el) return '';
-    const ta = el.querySelector('textarea');
-    return ta?.value?.trim() ? '\n  Note: ' + ta.value.trim() : '';
-  };
-
-  // Rates
-  let dmg = '\n\nRATE CALCULATION BASIS: ' + rb;
-  dmg += '\n  - Base Rate      = Regular Pay / Workweeks / 40';
-  dmg += '\n  - Incentive Rate = Incentive Pay / Workweeks / (40 + [OT Variable])';
-  dmg += '\n  - FWW Rate       = Regular Pay / Workweeks / (40 + [OT Variable])';
-  if(document.getElementById('sc_co')?.classList.contains('selected'))
-    dmg += '\n  - CO FWW Rate    = (Regular Pay + Bonus) / Workweeks / (40 + [OT Variable])';
-
-  // Damages
-  if(isChk('ot_base'))      dmg += '\n\n[OT BASE RATE DAMAGES – 1.5×]\n  Formula: 1.5 × Base Rate × ' + oh + ' hrs × SOL Workweeks × ' + pw + '%' + noteOf('ot_base');
-  if(isChk('ot_fww'))       dmg += '\n\n[OT FWW RATE DAMAGES – 0.5×]\n  Formula: 0.5 × FWW Rate × ' + oh + ' hrs × SOL Workweeks × ' + pw + '%\n  FWW and 1.5× are mutually exclusive — do NOT sum together.' + noteOf('ot_fww');
-  if(isChk('ot_incentive')) dmg += '\n\n[INCENTIVE RATE DAMAGES]\n  Formula: 0.5 × Incentive Rate × ' + oh + ' hrs × SOL Workweeks × ' + pw + '%\n  Add to BOTH 1.5× total and FWW total.' + noteOf('ot_incentive');
-  if(isChk('liq_flsa'))     dmg += '\n\n[FLSA LIQUIDATED DAMAGES]\n  100% of FLSA unpaid wages. Good faith defense may apply. Report separately.' + noteOf('liq_flsa');
-  if(isChk('liq_ny'))       dmg += '\n\n[NY LIQUIDATED DAMAGES]\n  Automatic 100% of NY unpaid wages. No good faith defense.' + noteOf('liq_ny');
-  if(isChk('liq_ma'))       dmg += '\n\n[MA TREBLE DAMAGES]\n  3× all MA wage violations. Mandatory. Do NOT add FLSA liquids on top.' + noteOf('liq_ma');
-  if(isChk('liq_co'))       dmg += '\n\n[CO LIQUIDATED DAMAGES]\n  Automatic: greater of $1,000 OR 200% of wages.\n  Willful: greater of $3,000 OR 300% of wages. Report both scenarios.' + noteOf('liq_co');
-  if(isChk('interest')){
-    const ir = v('interestRate'), is2 = v('interestState');
-    dmg += '\n\n[PRE-JUDGMENT INTEREST – ' + is2 + ']\n  Simple interest at ' + ir + '% per annum.\n  Formula: (OT Damages + Incentive Damages) × ((Extrap. Date – Midpoint of Year) / 365) × ' + ir + '%\n  Calculate separately for OT and FWW models. Do NOT apply to liquidated damages.' + noteOf('interest');
-  }
-  if(isChk('meal_breaks'))  dmg += '\n\n[MEAL BREAK PREMIUMS]\n  Formula: SOL Workweeks × Base Rate × ' + mm + ' missed meals/week' + noteOf('meal_breaks');
-  if(isChk('rest_breaks'))  dmg += '\n\n[REST BREAK PREMIUMS]\n  Formula: SOL Workweeks × Base Rate × ' + mr + ' missed rests/week' + noteOf('rest_breaks');
-  if(isChk('wage_stmt'))    dmg += '\n\n[WAGE STATEMENT PENALTIES]\n  NY: MIN($250 × workweeks × 5, $5,000) per employee.\n  CA: $50 first pay period + $100 each subsequent, MAX $4,000 per employee.' + noteOf('wage_stmt');
-  if(isChk('wage_notice'))  dmg += '\n\n[WAGE NOTICE PENALTIES – NY ONLY]\n  MIN($50 × workweeks × 5, $5,000) per employee.' + noteOf('wage_notice');
-  if(isChk('post_sep'))     dmg += '\n\n[POST-SEPARATION WAITING TIME – CA ONLY]\n  Terminated employees: Last Base Rate × 8 hours × 30 days.' + noteOf('post_sep');
-  if(isChk('paga')){
-    dmg += '\n\n[PAGA PENALTIES – CA ONLY]\n  SOL: ' + (v('pagaSOL')||'[PAGA SOL Start]') + ' – ' + ex +
-           '\n  Pay periods = CEILING(Workweeks / 2)\n  Report PAGA SEPARATELY from other CA damages; provide standalone and aggregate totals.' + noteOf('paga');
-  }
-  if(isChk('min_wage_liq')) dmg += '\n\n[MINIMUM WAGE LIQUIDATED DAMAGES]\n  Formula: $' + v('minWageRate') + ' × ' + oh + ' OT hrs × SOL Workweeks' + noteOf('min_wage_liq');
-  if(isChk('rsu'))          dmg += '\n\n[RSU DAMAGES]\n  Per-Week RSU Value = (No. RSUs × RSU Value at Vesting) / Workweeks in Vesting Period.\n  OT RSU Value = Per-Week RSU Value × 0.5 / (40 + Avg OT Hours). Damages = OT RSU Value × OT Hours.' + noteOf('rsu');
-  if(isChk('tipped'))       dmg += '\n\n[TIPPED MINIMUM WAGE DAMAGES]\n  Formula: (Min Wage – Cash Wage) × Hours Worked.' + noteOf('tipped');
-  if(isChk('spread'))       dmg += '\n\n[NY SPREAD OF HOURS]\n  Extra 1 hour at minimum wage for any workday where spread exceeds 10 hours.' + noteOf('spread');
-  if(isChk('other_damage')){
-    const el = document.getElementById('x_other_damage');
-    const ta = el && el.querySelector('textarea');
-    dmg += '\n\n[OTHER DAMAGES]\n  ' + (ta?.value?.trim() || '(see notes)');
-  }
-
-  // Merits
-  let merits = '';
-  if(isChk('merits_7i'))   merits += '\n\n[7i MERITS ANALYSIS]\n  Compare Incentive Pay to Regular Pay per employee per year.\n  Report: # and % of employees where Incentive Pay > Regular Pay.' + noteOf('merits_7i');
-  if(isChk('merits_hce'))  merits += '\n\n[HCE MERITS ANALYSIS]\n  Non-CA, non-NY employees. Threshold pre-6/30/2024: $107,432; post-7/1/2024: $132,964.\n  Annualize partial-year compensation. Report # and % exceeding threshold per year.' + noteOf('merits_hce');
-  if(isChk('severance'))   merits += '\n\n[SEVERANCE WORKWEEKS]\n  Include in totals but display separately on summary.' + noteOf('severance');
-  if(isChk('arbitration')) merits += '\n\n[ARBITRATION WORKWEEKS]\n  Include in totals but display separately on summary.' + noteOf('arbitration');
-  const mn = v('meritsNotes'); if(mn) merits += '\n\nMerits notes: ' + mn;
-
-  // Presentation
-  let pres = '\n\nPRESENTATION:\n  Summary tab: Toggles, Damages' +
-    (isChk('pres_by_state') ? ' by state' : '') + (isChk('pres_by_year') ? ' by year' : '') + ', Class Info, Merits results.';
-  if(isChk('pres_extrapolated'))    pres += '\n  Show both extrapolated and un-extrapolated workweeks and headcounts.';
-  if(isChk('pres_per_ee'))          pres += '\n  Report damages per employee per year for back-of-envelope checks.';
-  if(isChk('pres_with_without_liq'))pres += '\n  Provide totals with and without liquidated / treble damages.';
-  if(isChk('pres_paga_sep'))        pres += '\n  Show PAGA separately from other CA damages, plus aggregate total.';
-  if(v('headcountBreakouts'))        pres += '\n  Headcount breakouts: ' + v('headcountBreakouts');
-  if(v('titleHeadcounts'))           pres += '\n  Job title headcounts: ' + v('titleHeadcounts');
-  if(v('presentationNotes'))         pres += '\n  ' + v('presentationNotes');
-
-  // Extra notes
-  const extras = [
-    v('caseNotes')         && 'CASE NOTES:\n  '               + v('caseNotes'),
-    v('dataNotes')         && 'DATA SOURCE NOTES:\n  '         + v('dataNotes'),
-    v('stateNotes')        && 'JURISDICTION NOTES:\n  '        + v('stateNotes'),
-    v('additionalToggles') && 'ADDITIONAL TOGGLES:\n  '        + v('additionalToggles'),
-    v('dataCleaningNotes') && 'DATA CLEANING INSTRUCTIONS:\n  '+ v('dataCleaningNotes'),
-    v('otherNotes')        && 'OTHER NOTES:\n  '               + v('otherNotes'),
-  ].filter(Boolean).join('\n\n');
-
-  const stateList = [
-    ...selStates.map(s => s.name),
-    ...(otherChecked.length ? ['Other: ' + otherChecked.join(', ')] : [])
-  ].join(', ');
-
-  return (
-    cn.toUpperCase() + ' – DAMAGES INSTRUCTIONS\n' + '='.repeat(60) +
-    '\n\nGENERAL' +
-    '\n  Case: '        + cn +
-    '\n  Matter #: '    + (v('matterNum')||'—') +
-    '\n  Job title(s): '+ (v('jobTitles')||'—') +
-    '\n  Submitted by: '+ ((v('attyFirst')+' '+v('attyLast')).trim()||'—') +
-    '\n  Data end date: '     + de +
-    '\n  Extrapolation date: '+ ex +
-    '\n  Pay period: '        + v('payPeriod') +
-    '\n  Jurisdictions: '     + stateList +
-    '\n\nDATA SOURCES:' + (dsSrc || '\n  [To be provided]') +
-    '\n\nTOGGLES / ASSUMPTIONS:' +
-    '\n  OT hours variable: '           + oh + ' hrs/week (placeholder)' +
-    '\n  Percent of workweeks at issue: '+ pw + '%' +
-    '\n  Missed meal breaks/week: '     + mm + ' (placeholder)' +
-    '\n  Missed rest breaks/week: '     + mr + ' (placeholder)' +
-    '\n  Rate calculation basis: '      + rb +
-    solTxt + dmg + merits + pres +
-    (extras ? '\n\n' + extras : '')
-  );
+// ── build text ───────────────────────────────────────────────
+function buildText(draftMode){
+  const cn=v('caseName')||'[Case Name]';
+  const ex=v('extrapolationDate')||'[TBD — toggleable in model]';
+  const oh=v('otHours'),pw=v('pctWorkweeks'),mm=v('missedMeals'),mr=v('missedRests');
+  const atty=(v('attyFirst')+' '+v('attyLast')).trim()||'[Attorney]';
+  const partner=(v('partnerFirst')+' '+v('partnerLast')).trim();
+  const ccNames=Array.from(document.querySelectorAll('.cc-row')).map(r=>{const f=r.querySelector('.ccf')?.value?.trim(),l=r.querySelector('.ccl')?.value?.trim();return(f&&l)?f+' '+l:'';}).filter(Boolean);
+  const selStates=STATE_DEFS.filter(s=>s.id!=='other'&&document.getElementById('sc_'+s.id)?.classList.contains('sel'));
+  const otherCk=Array.from(document.querySelectorAll('#otherStateList input:checked')).map(c=>c.value);
+  const noteOf=id=>{const el=document.getElementById('x_'+id);if(!el)return'';const ta=el.querySelector('textarea');return ta?.value?.trim()?'\n  → '+ta.value.trim():'';};
+  let nps='';document.querySelectorAll('.np-row').forEach(r=>{const ins=r.querySelectorAll('input');if(ins[0].value)nps+='\n  - '+ins[0].value+(ins[1].value?' (ID: '+ins[1].value+')':'');});
+  let links='';document.querySelectorAll('.link-row').forEach(r=>{const ins=r.querySelectorAll('input');if(ins[0].value)links+='\n  - '+ins[0].value+(ins[1].value?' ('+ins[1].value+')':'');});
+  let sol='\n\nSTATUTE OF LIMITATIONS:';
+  selStates.forEach(s=>{if(s.id==='flsa'){sol+='\n  - FLSA Collective: [SOL start per case] – '+ex;}else{const sv=document.getElementById('sol_'+s.id)?.value||'[TBD]';const sl=document.getElementById('sollength_'+s.id)?.value||'[TBD]';sol+='\n  - '+s.name+': start '+sv+', length '+sl+', end '+ex;}});
+  otherCk.forEach(s=>{const k='other_'+s.replace(/\s/g,'_');sol+='\n  - '+s+': start '+(document.getElementById('sol_'+k)?.value||'[TBD]')+', length '+(document.getElementById('sollength_'+k)?.value||'[TBD]')+', end '+ex;});
+  let togsUsed=[];if(isChk('tog_ot'))togsUsed.push('OT hours/week: '+oh+' hrs (placeholder)');if(isChk('tog_pct'))togsUsed.push('Workweeks at issue: '+pw+'%');if(isChk('tog_meals'))togsUsed.push('Missed meal breaks/week: '+mm+' (placeholder)');if(isChk('tog_rests'))togsUsed.push('Missed rest breaks/week: '+mr+' (placeholder)');
+  let dmg='\n\nRATE CALCULATION:';dmg+='\n  - Base Rate      = Regular Pay / Workweeks / 40';dmg+='\n  - Incentive Rate = Incentive Pay / Workweeks / (40 + [OT Variable])';dmg+='\n  - FWW Rate       = Regular Pay / Workweeks / (40 + [OT Variable])';if(document.getElementById('sc_co')?.classList.contains('sel'))dmg+='\n  - CO FWW Rate    = (Regular Pay + Bonus) / Workweeks / (40 + [OT Variable])';dmg+='\n  NOTE: Data team to confirm rate basis (annualized vs. period-specific) from dataset review.';
+  const d=(c,title,body)=>c?'\n\n['+title+']\n  '+body:'';
+  dmg+=d(isChk('ot_base'),'OT BASE RATE – 1.5×','1.5 × Base Rate × OT Hrs × SOL Workweeks'+(isChk('tog_pct')?' × '+pw+'%':'')+noteOf('ot_base'));
+  dmg+=d(isChk('ot_fww'),'OT FWW RATE – 0.5×','0.5 × FWW Rate × OT Hrs × SOL Workweeks'+(isChk('tog_pct')?' × '+pw+'%':'')+'\n  FWW and 1.5× mutually exclusive — do NOT sum.'+noteOf('ot_fww'));
+  dmg+=d(isChk('ot_incentive'),'INCENTIVE RATE – 0.5×','0.5 × Incentive Rate × OT Hrs × SOL Workweeks'+(isChk('tog_pct')?' × '+pw+'%':'')+'\n  Add to BOTH 1.5× and FWW totals.'+noteOf('ot_incentive'));
+  dmg+=d(isChk('liq_flsa'),'FLSA LIQUIDATED DAMAGES','100% of FLSA unpaid wages. Good faith defense available.'+noteOf('liq_flsa'));
+  dmg+=d(isChk('liq_ny'),'NY LIQUIDATED DAMAGES','100% of NY unpaid wages. Good faith defense exists; burden on employer.'+noteOf('liq_ny'));
+  dmg+=d(isChk('liq_ma'),'MA TREBLE DAMAGES','3× all MA wage violations. Mandatory. Do NOT stack with FLSA liquids.'+noteOf('liq_ma'));
+  dmg+=d(isChk('liq_co'),'CO LIQUIDATED DAMAGES','Automatic: greater of $1,000 or 200%. Willful: greater of $3,000 or 300%.'+noteOf('liq_co'));
+  const intLines=[];[{id:'ny',l:'New York'},{id:'ca',l:'California'},{id:'ma',l:'Massachusetts'},{id:'co',l:'Colorado'},{id:'il',l:'Illinois'}].forEach(s=>{if(isChk('int_'+s.id))intLines.push(s.l+': '+v('int_'+s.id+'_rate')+'%');});if(isChk('int_other')&&v('int_other_state'))intLines.push(v('int_other_state')+': '+v('int_other_rate')+'%');
+  if(intLines.length){dmg+='\n\n[PRE-JUDGMENT INTEREST]\n  Simple interest. Do NOT apply to liquidated damages.\n  Formula: Unpaid Wages × ((Extrapolation Date – Midpoint of Year) / 365) × Rate\n  Rates:\n'+intLines.map(l=>'    - '+l).join('\n');const in2=v('interestNotes');if(in2)dmg+='\n  Notes: '+in2;}
+  dmg+=d(isChk('meal_breaks'),'MEAL BREAK PREMIUMS','SOL Workweeks × Base Rate × '+(isChk('tog_meals')?mm+' missed meals/week':'[missed meals toggle]')+noteOf('meal_breaks'));
+  dmg+=d(isChk('rest_breaks'),'REST BREAK PREMIUMS','SOL Workweeks × Base Rate × '+(isChk('tog_rests')?mr+' missed rests/week':'[missed rests toggle]')+noteOf('rest_breaks'));
+  dmg+=d(isChk('wage_stmt'),'WAGE STATEMENT PENALTIES','NY: MIN($250 × workweeks × 5, $5,000). CA: $50 first + $100 subsequent, MAX $4,000.'+noteOf('wage_stmt'));
+  dmg+=d(isChk('wage_notice'),'WAGE NOTICE PENALTIES – NY','MIN($50 × workweeks × 5, $5,000) per employee.'+noteOf('wage_notice'));
+  dmg+=d(isChk('post_sep'),'POST-SEPARATION WAITING TIME – CA','Terminated employees: Last Base Rate × 8 × 30.'+noteOf('post_sep'));
+  if(isChk('paga'))dmg+='\n\n[PAGA – CA ONLY]\n  SOL: '+(v('pagaSOL')||'[TBD]')+' – '+ex+'\n  Pay periods = CEILING(Workweeks / 2). Report SEPARATELY from other CA damages.'+noteOf('paga');
+  if(isChk('min_wage_liq'))dmg+='\n\n[MIN WAGE LIQUIDATED DAMAGES]\n  $'+v('minWageRate')+' × OT Hrs × SOL Workweeks'+noteOf('min_wage_liq');
+  dmg+=d(isChk('rsu'),'RSU DAMAGES','Per-Week RSU Value = (RSUs × Value at Vesting) / Vesting Workweeks.'+noteOf('rsu'));
+  dmg+=d(isChk('tipped'),'TIPPED MIN WAGE DAMAGES','(Min Wage – Cash Wage) × Hours Worked.'+noteOf('tipped'));
+  dmg+=d(isChk('spread'),'NY SPREAD OF HOURS','Extra 1 hr at min wage for workdays where spread exceeds 10 hrs.'+noteOf('spread'));
+  if(isChk('other_damage')){const ta=document.getElementById('x_other_damage')?.querySelector('textarea');dmg+='\n\n[OTHER DAMAGES]\n  '+(ta?.value?.trim()||'(see notes)');}
+  const dc=v('damagesCaveats');if(dc)dmg+='\n\n[OVERALL DAMAGES CAVEATS]\n  '+dc;
+  let merits='';
+  if(isChk('merits_7i'))merits+='\n\n[7i MERITS]\n  Incentive Pay vs. Regular Pay per employee per year.'+noteOf('merits_7i');
+  if(isChk('merits_hce'))merits+='\n\n[HCE MERITS]\n  Non-CA, non-NY. Pre-6/30/2024: $107,432; post-7/1/2024: $132,964.'+noteOf('merits_hce');
+  if(isChk('proxy_time'))merits+='\n\n[PROXY TIME / OFF-THE-CLOCK]\n  Time analysis to establish uncompensated work.'+noteOf('proxy_time');
+  if(isChk('severance'))merits+='\n\n[SEVERANCE — HEADCOUNT & WORKWEEKS]\n  Include in totals; display separately on summary.'+noteOf('severance');
+  if(isChk('arbitration'))merits+='\n\n[ARBITRATION — HEADCOUNT & WORKWEEKS]\n  Include in totals; display separately on summary.'+noteOf('arbitration');
+  const mn=v('meritsNotes');if(mn)merits+='\n\nMerits notes: '+mn;
+  let pres='\n\nPRESENTATION:\n  Summary: Toggles, Damages'+(isChk('pres_by_state')?' by state':'')+(isChk('pres_by_year')?' by year':'')+', Class Info, Merits.';
+  if(isChk('pres_extrapolated'))pres+='\n  Extrapolated and un-extrapolated workweeks/headcounts.';if(isChk('pres_per_ee'))pres+='\n  Damages per employee per year.';if(isChk('pres_with_without_liq'))pres+='\n  Totals with and without liquidated/treble damages.';if(isChk('pres_paga_sep'))pres+='\n  PAGA separate plus aggregate.';if(v('headcountBreakouts'))pres+='\n  Headcounts: '+v('headcountBreakouts');if(v('titleHeadcounts'))pres+='\n  Title headcounts: '+v('titleHeadcounts');if(v('presentationNotes'))pres+='\n  '+v('presentationNotes');
+  const extras=[v('fieldMapping')&&'FIELD/COLUMN MAPPING:\n'+v('fieldMapping').split('\n').map(l=>'  '+l).join('\n'),v('caseNotes')&&'CASE NOTES:\n  '+v('caseNotes'),v('logistics')&&'KEY LOGISTICS:\n  '+v('logistics'),v('dataNotes')&&'DATA NOTES:\n  '+v('dataNotes'),v('stateNotes')&&'JURISDICTION NOTES:\n  '+v('stateNotes'),v('additionalToggles')&&'ADDITIONAL TOGGLES:\n  '+v('additionalToggles'),v('dataCleaningNotes')&&'DATA CLEANING:\n  '+v('dataCleaningNotes'),v('otherNotes')&&'OTHER NOTES:\n  '+v('otherNotes'),].filter(Boolean).join('\n\n');
+  const stateList=[...selStates.map(s=>s.name),...(otherCk.length?['Other: '+otherCk.join(', ')]:[] )].join(', ');
+  return(draftMode?'*** DRAFT — PENDING PARTNER REVIEW ***\n\n':'*** FINAL ***\n\n')+'WAGE & HOUR DAMAGES INSTRUCTIONS\nMisclassification / Salaried Worker Case\n'+'='.repeat(60)+'\n\nGENERAL\n'+'  Case:                '+cn+'\n'+'  Matter #:            '+(v('matterNum')||'—')+'\n'+'  Billing code:        '+(v('billingCode')||'—')+'\n'+'  Job title(s):        '+(v('jobTitles')||'—')+'\n'+'  Submitted by:        '+atty+(v('attyRole')==='associate'?' (Associate)':' (Partner)')+'\n'+(partner?'  Reviewing partner:  '+partner+'\n':'')+(ccNames.length?'  Additional CC:      '+ccNames.join(', ')+'\n':'')+'  Pay period:          '+v('payPeriod')+'\n'+'  Extrapolation date:  '+ex+' (toggleable)\n'+'  First-round deadline:'+( v('deadlineFirst')||'—')+'\n'+'  Final deadline:      '+(v('deadlineFinal')||'—')+'\n'+'  Jurisdictions:       '+stateList+(nps?'\n\nNAMED PLAINTIFFS:'+nps:'')+'\n\nDATA SOURCES:'+(uploadedFiles.length?'\n  Uploaded: '+uploadedFiles.map(f=>f.name).join(', '):'')+(links?'\n  Links:'+links:'')+(v('datasetDesc')?'\n\n  Description: '+v('datasetDesc'):'')+'\n\nTOGGLES / ASSUMPTIONS:\n'+togsUsed.map(t=>'  '+t).join('\n')+sol+dmg+merits+pres+(extras?'\n\n'+extras:'');
 }
 
-// ── Generate (preview only) ───────────────────────────────────
-function generate(){
-  const txt = buildInstructions();
-  document.getElementById('instructionsText').textContent = txt;
-  document.getElementById('summaryModal').classList.add('open');
+// ── docx ─────────────────────────────────────────────────────
+async function generateDocx(draftMode){
+  const txt=buildText(draftMode);const cn=v('caseName')||'Case';
+  const {Document,Packer,Paragraph,TextRun,AlignmentType}=docx;
+  const paras=[];
+  paras.push(new Paragraph({children:[new TextRun({text:draftMode?'DRAFT — PENDING PARTNER REVIEW':'FINAL INSTRUCTIONS',bold:true,color:draftMode?'C05000':'1a5c1a',size:24})],alignment:AlignmentType.CENTER,spacing:{after:220}}));
+  txt.split('\n').forEach(line=>{
+    if(!line.trim()||line.startsWith('=')||line.startsWith('***'))return;
+    const isBr=line.trim().startsWith('[')&&line.trim().endsWith(']');
+    const isSec=!line.startsWith(' ')&&line.includes(':')&&line===line.toUpperCase();
+    paras.push(isBr?new Paragraph({children:[new TextRun({text:line.trim(),bold:true,size:22})],spacing:{before:160,after:60}}):isSec?new Paragraph({children:[new TextRun({text:line.trim(),bold:true,size:24})],spacing:{before:200,after:80}}):new Paragraph({children:[new TextRun({text:line,size:20})],spacing:{after:40},indent:line.startsWith('  ')?{left:360}:{}}));
+  });
+  const blob=await Packer.toBlob(new Document({sections:[{properties:{},children:paras}]}));
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(draftMode?'DRAFT_':'FINAL_')+cn.replace(/[^a-z0-9]/gi,'_')+'_Damages_Instructions.docx';a.click();URL.revokeObjectURL(a.href);
 }
 
-// ── Generate + open Outlook ───────────────────────────────────
-function generateAndEmail(){
-  const attyFirst = v('attyFirst').trim();
-  const attyLast  = v('attyLast').trim();
-  if(!attyFirst || !attyLast){
-    alert('Please enter your name in the Attorney & Recipients section before sending.');
-    return;
-  }
-  const recipients = getRecipientEmails();
-  if(!recipients.length){
-    alert('Please add at least one recipient before sending.');
-    return;
-  }
-
-  const txt       = buildInstructions();
-  const attyEmail = toEmail(attyFirst, attyLast);
-  const recipNames = getRecipientNames();
-  const cn        = v('caseName') || 'Case';
-  const subject   = 'Damages Instructions – ' + cn + (recipNames.length ? ' – Assigned to ' + recipNames.join(', ') : '');
-
-  const bodyIntro = 'Hi ' + (recipNames.join(' & ')||'team') + ',\n\nPlease find the damages instructions for ' + cn + ' below, submitted by ' + (attyFirst+' '+attyLast).trim() + '.\n\n' + '─'.repeat(60) + '\n\n';
-  const bodyOutro = '\n\n' + '─'.repeat(60) + '\n\nPlease don\'t hesitate to reach out with any questions.\n\n' + (attyFirst+' '+attyLast).trim();
-  const fullBody  = bodyIntro + txt + bodyOutro;
-
-  const LIMIT   = 1800;
-  const mailBody = fullBody.length > LIMIT
-    ? fullBody.slice(0, LIMIT) + '\n\n[Email body truncated — see preview for full instructions]'
-    : fullBody;
-
-  // Show preview first
-  document.getElementById('instructionsText').textContent = txt;
-  document.getElementById('summaryModal').classList.add('open');
-
-  setTimeout(() => {
-    window.location.href = 'mailto:' + recipients.join(',') +
-      '?cc=' + encodeURIComponent(attyEmail) +
-      '&subject=' + encodeURIComponent(subject) +
-      '&body=' + encodeURIComponent(mailBody);
-  }, 300);
+// ── state save/load ──────────────────────────────────────────
+function gatherState(){
+  const fids=['attyFirst','attyLast','attyRole','partnerFirst','partnerLast','caseName','matterNum','billingCode','jobTitles','payPeriod','extrapolationDate','deadlineFirst','deadlineFinal','logistics','caseNotes','datasetDesc','fieldMapping','dataNotes','stateNotes','otHours','pctWorkweeks','missedMeals','missedRests','additionalToggles','pagaSOL','minWageRate','minWageState','meritsNotes','headcountBreakouts','titleHeadcounts','presentationNotes','dataCleaningNotes','otherNotes','damagesCaveats','interestNotes','int_ny_rate','int_ca_rate','int_ma_rate','int_co_rate','int_il_rate','int_other_rate','int_other_state'];
+  const cids=['ot_base','ot_fww','ot_incentive','liq_flsa','liq_ny','liq_ma','liq_co','int_ny','int_ca','int_ma','int_co','int_il','int_other','meal_breaks','rest_breaks','wage_stmt','wage_notice','post_sep','paga','min_wage_liq','rsu','tipped','spread','other_damage','merits_7i','merits_hce','proxy_time','severance','arbitration','pres_by_state','pres_by_year','pres_per_ee','pres_extrapolated','pres_with_without_liq','pres_paga_sep','tog_ot','tog_pct','tog_meals','tog_rests'];
+  const notes={};cids.forEach(id=>{const el=document.getElementById('x_'+id);if(el){const ta=el.querySelector('textarea');if(ta)notes['note_'+id]=ta.value;}});
+  const states={};STATE_DEFS.forEach(s=>{states['sel_'+s.id]=document.getElementById('sc_'+s.id)?.classList.contains('sel')||false;});OTHER_STATES.forEach(s=>{const el=document.querySelector('#otherStateList input[value="'+s+'"]');if(el)states['oth_'+s]=el.checked;});
+  const solV={};[...STATE_DEFS.filter(s=>s.id!=='other'),...OTHER_STATES].forEach(item=>{const id=typeof item==='string'?'other_'+item.replace(/\s/g,'_'):item.id;['sol_','sollength_'].forEach(p=>{const el=document.getElementById(p+id);if(el)solV[p+id]=el.value;});});
+  const recips=Array.from(document.querySelectorAll('.rr')).map(r=>({f:r.querySelector('.rf')?.value||'',l:r.querySelector('.rl')?.value||''}));
+  const ccs=Array.from(document.querySelectorAll('.cc-row')).map(r=>({f:r.querySelector('.ccf')?.value||'',l:r.querySelector('.ccl')?.value||''}));
+  const nps2=Array.from(document.querySelectorAll('.np-row')).map(r=>{const ins=r.querySelectorAll('input');return{name:ins[0]?.value||'',id:ins[1]?.value||''};});
+  const links=Array.from(document.querySelectorAll('.link-row')).map(r=>{const ins=r.querySelectorAll('input');return{url:ins[0]?.value||'',label:ins[1]?.value||''};});
+  return{fields:Object.fromEntries(fids.map(id=>[id,v(id)])),checkboxes:Object.fromEntries(cids.map(id=>[id,isChk(id)])),notes,states,solV,recips,ccs,nps:nps2,links};
 }
 
-// ── Copy ──────────────────────────────────────────────────────
-function copyIt(){
-  navigator.clipboard.writeText(document.getElementById('instructionsText').textContent).then(() => {
-    const b = event.target;
-    b.textContent = 'Copied!';
-    setTimeout(() => { b.textContent = 'Copy to clipboard'; }, 2000);
+function applyState(s){
+  if(!s)return;
+  Object.entries(s.fields||{}).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});
+  Object.entries(s.checkboxes||{}).forEach(([id,val])=>{const cb=document.getElementById(id);if(cb){cb.checked=val;const ex=document.getElementById('x_'+id);if(ex)ex.classList.toggle('vis',val);}});
+  Object.entries(s.notes||{}).forEach(([key,val])=>{const id=key.replace('note_','');const ex=document.getElementById('x_'+id);if(ex){const ta=ex.querySelector('textarea');if(ta)ta.value=val;}});
+  STATE_DEFS.forEach(sd=>{const sel=s.states?.['sel_'+sd.id];const el=document.getElementById('sc_'+sd.id);if(el&&sel!==undefined)el.classList.toggle('sel',sel);});
+  if(s.states?.['sel_other'])document.getElementById('otherStatesPanel').classList.add('vis');
+  OTHER_STATES.forEach(st=>{if(s.states?.['oth_'+st]){const el=document.querySelector('#otherStateList input[value="'+st+'"]');if(el)el.checked=true;}});
+  updateSOLFields();
+  Object.entries(s.solV||{}).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});
+  showStateNotes();
+  document.getElementById('recipientList').innerHTML='';rc=0;(s.recips||[]).forEach(r=>{addRecipient();const rows=document.querySelectorAll('.rr');const last=rows[rows.length-1];if(last){last.querySelector('.rf').value=r.f||'';last.querySelector('.rl').value=r.l||'';}});if(!s.recips?.length)addRecipient();
+  document.getElementById('ccList').innerHTML='';cc=0;(s.ccs||[]).forEach(r=>{addCC();const rows=document.querySelectorAll('.cc-row');const last=rows[rows.length-1];if(last){last.querySelector('.ccf').value=r.f||'';last.querySelector('.ccl').value=r.l||'';}});
+  document.getElementById('npList').innerHTML='';np=0;(s.nps||[]).forEach(n=>{addNP();const rows=document.querySelectorAll('.np-row');const last=rows[rows.length-1];if(last){const ins=last.querySelectorAll('input');ins[0].value=n.name||'';ins[1].value=n.id||'';}});
+  document.getElementById('linkList').innerHTML='';lc=0;(s.links||[]).forEach(l=>{addLink();const rows=document.querySelectorAll('.link-row');const last=rows[rows.length-1];if(last){const ins=last.querySelectorAll('input');ins[0].value=l.url||'';ins[1].value=l.label||'';}});if(!s.links?.length)addLink();
+  previewEmails();updateProg();
+}
+
+function loadStateFromFile(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{try{applyState(JSON.parse(e.target.result));isDraft=true;document.getElementById('draftBadge').classList.add('visible');document.getElementById('ws2').classList.add('done');document.getElementById('ws3').classList.add('active');document.getElementById('approveBtn').style.display='inline-flex';alert('Draft loaded. Review, then approve and submit.');}catch(err){alert('Could not load draft: '+err.message);}};
+  reader.readAsText(file);input.value='';
+}
+
+// ── actions ──────────────────────────────────────────────────
+function markApproved(){document.getElementById('approveBtn').style.display='none';document.getElementById('approvedBanner').style.display='flex';document.getElementById('ws3').classList.add('done');document.getElementById('ws4').classList.add('active');}
+function previewInstructions(){document.getElementById('previewText').textContent=buildText(true);document.getElementById('previewOverlay').classList.add('open');}
+async function saveDraft(){
+  if(!v('attyFirst')||!v('attyLast')){alert('Please enter your name before saving.');return;}
+  if(!v('caseName')){alert('Please enter a case name before saving.');return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(gatherState(),null,2)],{type:'application/json'}));a.download='DRAFT_'+(v('caseName')||'Case').replace(/[^a-z0-9]/gi,'_')+'_state.json';a.click();URL.revokeObjectURL(a.href);
+  await generateDocx(true);
+  isDraft=true;document.getElementById('draftBadge').classList.add('visible');document.getElementById('ws2').classList.add('done');document.getElementById('ws3').classList.add('active');
+  alert('Draft saved!\n\n✓ Share the .json with the reviewing partner to load it back.\n✓ DRAFT Word doc also downloaded.\n\nWhen ready, click "Finalize & Submit".');
+}
+function copyField(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  navigator.clipboard.writeText(el.value).then(()=>{
+    const btn=event.target;const orig=btn.textContent;
+    btn.textContent='Copied!';setTimeout(()=>btn.textContent=orig,1800);
   });
 }
 
-// ── Init ──────────────────────────────────────────────────────
-renderStates();
-updateProg();
-addRecipient();
+async function finalizeAndSubmit(){
+  if(!v('attyFirst')||!v('attyLast')){alert('Please enter your name.');return;}
+  if(!v('caseName')){alert('Please enter a case name.');return;}
+  const recips=getRecipEmails();if(!recips.length){alert('Please add at least one data team recipient.');return;}
+  if(!isDraft&&!confirm('Form has not been saved as a draft yet. Submit anyway?'))return;
+  await generateDocx(false);
+  const cn=v('caseName')||'Case';const atty=(v('attyFirst')+' '+v('attyLast')).trim();
+  const ccEmails=[toEmail(v('attyFirst'),v('attyLast')),...getCCEmails()].filter(Boolean);
+  const recipNames=getRecipNames();
+  const subject='Damages Instructions – '+cn+(recipNames.length?' – Assigned to '+recipNames.join(', '):'');
+  const body='Hi '+(recipNames.join(' & ')||'team')+',\n\nPlease find the finalized damages instructions for '+cn+' attached as a Word document.\n\nSubmitted by: '+atty+'\nCase: '+cn+'\nBilling code: '+(v('billingCode')||'—')+'\nFirst-round deadline: '+(v('deadlineFirst')||'—')+'\n\nPlease reach out with any questions.\n\n'+atty;
+  document.getElementById('ws4').classList.add('active');
+
+  // Populate fallback modal
+  document.getElementById('emailTo').value=recips.join(', ');
+  document.getElementById('emailCC').value=ccEmails.join(', ');
+  document.getElementById('emailSubject').value=subject;
+  document.getElementById('emailBody').value=body;
+
+  // Try mailto first; show fallback modal regardless after short delay
+  const mailto='mailto:'+recips.join(',')+'?cc='+encodeURIComponent(ccEmails.join(','))+'&subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  try{ window.location.href=mailto; }catch(e){}
+  setTimeout(()=>{ document.getElementById('emailOverlay').classList.add('open'); }, 600);
+}
+function copyPreview(){navigator.clipboard.writeText(document.getElementById('previewText').textContent).then(()=>{const b=event.target;b.textContent='Copied!';setTimeout(()=>b.textContent='Copy to clipboard',2000);});}
+
+// ── init ─────────────────────────────────────────────────────
+renderStates();updateProg();addRecipient();addNP();addLink();
+document.getElementById('sc_flsa').classList.add('sel');
+showStateNotes();
 </script>
 </body>
 </html>
